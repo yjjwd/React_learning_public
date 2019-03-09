@@ -1,1 +1,5 @@
 # React_learning_public
+
+0303之前欠缺的太多，目前进行到课程13-03，处于半copy半照着写的水平，要尽快学会灵活运用
+
+0309页面判断注册以及登陆 大致了解nodejs 学习了ReactNative的一些内容
