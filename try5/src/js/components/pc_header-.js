@@ -59,14 +59,15 @@ class PCHeader extends React.Component {
 		if(this.state.action=='register')
 		{
 			if(formData.r_password==formData.r_confirmPassword)
-			localStorage.setItem(formData.r_userName,formData.r_password)
+			localStorage.r_userName=formData.r_userName;
+			localStorage.r_password=formData.r_password;
 		}
 		if (this.state.action=="login")
 			{
-				if(formData.password==localStorage.getItem(formData.userName))
+				if(formData.userName==localStorage.r_userName&&formData.password==localStorage.r_password)
 				{
 					this.setState({hasLogined:true});
-					localStorage.userNickName=formData.userName
+					localStorage.userNickName=formData.userName;
 				}
 			}
 		message.success("请求成功！");
