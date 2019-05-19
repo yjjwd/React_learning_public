@@ -317,6 +317,26 @@ const getActivities = [
   },
 ];
 
+// 以下是mork尝试部分
+
+const morktest = [{
+  key:'1',
+  name:'xiaoming',
+  age:16,
+  address:'1h'
+  }, {
+  key:'2',
+  name:'wanglihong',
+  age:28,
+  address:'2b'
+  },
+  {
+  key:'3',
+  name:'caoxueqing',
+  age:49,
+  address:'136589663d'
+}];
+
 function getFakeCaptcha(req, res) {
   return res.json('captcha-xxx');
 }
@@ -333,4 +353,10 @@ export default {
   'GET /api/fake_list': getFakeList,
   'POST /api/fake_list': postFakeList,
   'GET /api/captcha': getFakeCaptcha,
+  'GET /api/home': morktest,
+  'POST /api/home': (req, res) => {
+    setTimeout(() => {
+      res.send('Ok');
+    }, 10000);
+  },
 };

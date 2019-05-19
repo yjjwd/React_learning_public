@@ -155,6 +155,7 @@ export default [
           },
           {
             path: '/profile/basic/:id',
+            name: 'basic',
             hideInMenu: true,
             component: './Profile/BasicProfile',
           },
@@ -289,9 +290,28 @@ export default [
           },
         ],
       },
+     //  newpage
+      {
+        path: "/experiment",
+        icon: "file",
+        name: "experiment",
+        routes: [
+          {
+            path: "/experiment/newPage",
+            name: "newPage",
+            component: "./experiment/NewPage"
+          },
+          {
+            path: "/experiment/Test",
+            name: "test",
+            component: "./experiment/Test"
+          }
+        ],
+      },
       {
         component: '404',
       },
     ],
   },
 ];
+

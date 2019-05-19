@@ -42,4 +42,8 @@ export default {
   'menu.editor.flow': '流程编辑器',
   'menu.editor.mind': '脑图编辑器',
   'menu.editor.koni': '拓扑编辑器',
+  // 以下为新增内容
+  'menu.experiment': '实验',
+  'menu.experiment.newPage': '新增页面',
+  'menu.experiment.test': 'Mork测试',
 };

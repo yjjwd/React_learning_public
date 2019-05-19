@@ -1,6 +1,21 @@
 import { stringify } from 'qs';
 import request from '@/utils/request';
 
+// 以下是mork尝试部分
+export async function queryHome() {
+  return request('/api/home');
+}
+
+// export async function queryHome() {
+//   return request('POST /api/home': (req, res) => {
+//     setTimeout(() => {
+//       res.send('Ok');
+//     }, 1000);
+//   },
+//   );
+// }
+
+
 export async function queryProjectNotice() {
   return request('/api/project/notice');
 }

@@ -51,7 +51,7 @@ class SearchList extends Component {
           enterButton="搜索"
           size="large"
           onSearch={this.handleFormSubmit}
-          style={{ maxWidth: 522, width: '100%' }}
+          style={{ width: 522 }}
         />
       </div>
     );
