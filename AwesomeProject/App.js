@@ -17,6 +17,10 @@ import {
 } from 'react-native';
 
 import {
+  StackNavigator,
+} from 'react-navigation';
+
+import {
   Header,
   LearnMoreLinks,
   Colors,
@@ -24,14 +28,47 @@ import {
   ReloadInstructions,
 } from 'react-native/Libraries/NewAppScreen';
 
+import HelloWorldApp from './components/hello.js'
+import Login from './components/login.js'
 
-const App = () => {
+const App =()=>{
   return (
-    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-    <Text>Hello, world!</Text>
-  </View>
-  );
-};
+    <Login></Login>
+  )
+}
+// const App = StackNavigator({
+//   Main: {screen: MainScreen},
+//   Profile: {screen: ProfileScreen},
+// });
+
+// class MainScreen extends React.Component {
+//   static navigationOptions = {
+//     title: 'Welcome',
+//   };
+//   render() {
+//     const { navigate } = this.props.navigation;
+//     return (
+//       <Button
+//         title="To Login"
+//         onPress={() =>
+//           navigate('Profile')
+//         }
+//       />
+//     );
+//   }
+// }
+
+// class ProfileScreen extends React.Component {
+//   static navigationOptions = {
+//     title: 'Login',
+//   };
+//   render() {
+//     const { navigate } = this.props.navigation;
+//     return(
+//     <Login></Login>
+//     )
+//   }
+// }
 
 const styles = StyleSheet.create({
   scrollView: {
