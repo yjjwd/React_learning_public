@@ -16,7 +16,7 @@ import React, {Component} from 'react';
 	    const { username, password } = this.state
 	    if (username === password && username === 'admin') {
 	      alert('登陆成功')
-	      this.props.navigation.navigate('MainScreen')
+	      this.props.navigation.navigate('Main')
 	    } else {
 	      alert('账号或密码错误')
 	    }

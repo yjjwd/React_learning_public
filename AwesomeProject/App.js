@@ -31,44 +31,47 @@ import {
 import HelloWorldApp from './components/hello.js'
 import Login from './components/login.js'
 
-const App =()=>{
-  return (
-    <Login></Login>
-  )
-}
-// const App = StackNavigator({
-//   Main: {screen: MainScreen},
-//   Profile: {screen: ProfileScreen},
-// });
-
-// class MainScreen extends React.Component {
-//   static navigationOptions = {
-//     title: 'Welcome',
-//   };
-//   render() {
-//     const { navigate } = this.props.navigation;
-//     return (
-//       <Button
-//         title="To Login"
-//         onPress={() =>
-//           navigate('Profile')
-//         }
-//       />
-//     );
-//   }
-// }
-
-// class ProfileScreen extends React.Component {
-//   static navigationOptions = {
-//     title: 'Login',
-//   };
-//   render() {
-//     const { navigate } = this.props.navigation;
-//     return(
+// const App =()=>{
+//   return (
 //     <Login></Login>
-//     )
-//   }
+//   )
 // }
+
+
+class MainScreen extends React.Component {
+  static navigationOptions = {
+    title: 'Welcome',
+  };
+  render() {
+    const { navigate } = this.props.navigation;
+    return (
+      <Button
+        title="To Login"
+        onPress={() =>
+          navigate('Profile')
+        }
+      />
+    );
+  }
+}
+
+class ProfileScreen extends React.Component {
+  static navigationOptions = {
+    title: 'Login',
+  };
+  render() {
+    const { navigate } = this.props.navigation;
+    return(
+    <Login></Login>
+    )
+  }
+}
+
+const App = StackNavigator({
+  Home: {screen: MainScreen},
+  Profile: {screen: ProfileScreen},
+});
+
 
 const styles = StyleSheet.create({
   scrollView: {
