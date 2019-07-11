@@ -1,5 +1,5 @@
 import  React,{Component} from 'react'
-import {Text,View,TextInput,StyleSheet } from 'react-native';
+import {Text,View,TextInput,StyleSheet,Button } from 'react-native';
 
 // export default class MineScreen extends Component{
 //     constructor(props){
@@ -20,10 +20,17 @@ import {Text,View,TextInput,StyleSheet } from 'react-native';
 // }
 
 export default class MineScreen extends React.Component {
+  static navigationOptions = {
+    title: '我的课程',
+  };
     render() {
       return (
-        <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-          <Text>Mine Screen</Text>
+        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
+          <Text>Teacher Screen</Text>
+          {/* <Button
+            title="Teacher->Mine"
+            onPress={() => this.props.navigation.navigate('Mine')}
+          /> */}
         </View>
       );
     }

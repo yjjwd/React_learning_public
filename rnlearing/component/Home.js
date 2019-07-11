@@ -1,5 +1,5 @@
 import  React,{Component} from 'react'
-import {Text,View,TextInput,StyleSheet } from 'react-native';
+import {Text,View,Image,TextInput,StyleSheet,Button } from 'react-native';
 
 // export default class HomeScreen extends Component{
 //     constructor(props){
@@ -20,16 +20,52 @@ import {Text,View,TextInput,StyleSheet } from 'react-native';
 // }
 
 export default class HomeScreen extends React.Component {
+  static navigationOptions = {
+    title: 'Home',
+  };
+  _watchID;
+  constructor(props) {
+    super(props);
+    this.state = {
+        Pos1: '',
+        Pos2: ''
+    }
+}
+  componentDidMount() {
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            let initialPosition = JSON.stringify(position);
+            this.setState({
+                Pos1: initialPosition
+            });
+        },
+        (error) => alert(error.message),
+        {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
+    );
+
+    this._watchID = navigator.geolocation.watchPosition((position)=> {
+        let lastPosition = JSON.stringify(position);
+        this.setState({
+            Pos2: lastPosition
+        });
+    }, (error)=> {
+        alert(error.message)
+    })
+  }
     render() {
       return (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <Text>Home Screen</Text>
-          <Button
-            title="Go to Details"
-            onPress={() => this.props.navigation.navigate('Mine')}
-          />
+        <View style={{flex: 1}}>
+          <View style={{ flex: 6}}>
+            <Image style={{flex:1}} source={require('../images/gzmap.png')} />
+          </View>
+          <View style={{flex:3,flexDirection:'row',justifyContent:'space-evenly'}}>
+            <Text>this.state.pos1</Text>
+          </View>
+          <View style={{flex:1,justifyContent: 'flex-end'}}>
+           <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/>
+          </View>
         </View>
-      );
+              )
     }
   }
 

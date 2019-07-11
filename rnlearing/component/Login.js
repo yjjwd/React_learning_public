@@ -1,5 +1,5 @@
 import  React,{Component} from 'react'
-import {Text,View,TextInput,StyleSheet } from 'react-native';
+import {Text,View,TextInput,StyleSheet,Botton } from 'react-native';
 import { createStackNavigator, createAppContainer } from 'react-navigation'
 
 export default class LoginScreen extends Component{
