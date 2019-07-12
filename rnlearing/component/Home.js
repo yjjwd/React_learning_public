@@ -19,6 +19,7 @@ import {Text,View,Image,TextInput,StyleSheet,Button } from 'react-native';
 //     }
 // }
 
+
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     title: 'Home',
@@ -28,21 +29,31 @@ export default class HomeScreen extends React.Component {
     super(props);
     this.state = {
         Pos1: '',
-        Pos2: ''
+        Pos2: '',
+        Pos3:'122.084000',
+        Pos4:'37.421998',
+        city:'',
+        test:''
     }
 }
+
   componentDidMount() {
-    navigator.geolocation.getCurrentPosition(
+    setTimeout(() => {
+      navigator.geolocation.getCurrentPosition(
         (position) => {
-            let initialPosition = JSON.stringify(position);
-            this.setState({
-                Pos1: initialPosition
-            });
+        const positionData=position.coords;
+        let initialPosition = JSON.stringify(position);
+            
+          this.setState({
+          Pos1:initialPosition,
+          Pos3:positionData.longitude,
+          Pos4:positionData.latitude,
+        })
         },
         (error) => alert(error.message),
         {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
     );
-
+    
     this._watchID = navigator.geolocation.watchPosition((position)=> {
         let lastPosition = JSON.stringify(position);
         this.setState({
@@ -51,15 +62,32 @@ export default class HomeScreen extends React.Component {
     }, (error)=> {
         alert(error.message)
     })
-  }
+    }, 0);
+    setTimeout(() => {
+      fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa77de5&location="+this.state.Pos3+","+this.state.Pos4+ "&poitype=城市&radius=1000&extensions=all&batch=false&roadlevel=0")
+      .then(response=>response.json())
+      .then(json=>{
+        // const data=JSON.stringify(json.regeocodes.formatted_address);
+            this.setState({
+              city:json.regeocode.formatted_address
+            })  
+      });
+    }, 0);
+}
+
+
     render() {
       return (
         <View style={{flex: 1}}>
           <View style={{ flex: 6}}>
             <Image style={{flex:1}} source={require('../images/gzmap.png')} />
           </View>
-          <View style={{flex:3,flexDirection:'row',justifyContent:'space-evenly'}}>
-            <Text>this.state.pos1</Text>
+          <View style={{flex:3,flexDirection:'column',justifyContent:'space-evenly'}}>
+            <Text>{this.state.Pos1}</Text>
+            <Text>{this.state.Pos2}</Text>
+            <Text>{this.state.Pos3}</Text>
+            <Text>{this.state.Pos4}</Text>
+            <Text>{this.state.city}</Text>
           </View>
           <View style={{flex:1,justifyContent: 'flex-end'}}>
            <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/>
