@@ -30,49 +30,82 @@ export default class HomeScreen extends React.Component {
     this.state = {
         Pos1: '',
         Pos2: '',
-        Pos3:'122.084000',
-        Pos4:'37.421998',
+        Pos3:'',
+        Pos4:'',
         city:'',
         test:''
     }
 }
 
-  componentDidMount() {
-    setTimeout(() => {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-        const positionData=position.coords;
-        let initialPosition = JSON.stringify(position);
-            
-          this.setState({
-          Pos1:initialPosition,
-          Pos3:positionData.longitude,
-          Pos4:positionData.latitude,
-        })
-        },
-        (error) => alert(error.message),
-        {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
-    );
-    
-    this._watchID = navigator.geolocation.watchPosition((position)=> {
-        let lastPosition = JSON.stringify(position);
-        this.setState({
-            Pos2: lastPosition
-        });
-    }, (error)=> {
-        alert(error.message)
-    })
-    }, 0);
-    setTimeout(() => {
-      fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa77de5&location="+this.state.Pos3+","+this.state.Pos4+ "&poitype=城市&radius=1000&extensions=all&batch=false&roadlevel=0")
+ GetLongitudeAndLatitude = () => {
+
+  return new Promise((resolve, reject) => {
+
+    navigator.geolocation.getCurrentPosition(
+          location => {
+             resolve([location.coords.longitude, location.coords.latitude]);
+          },
+          error => {
+              reject(error);
+          }
+      );
+  })
+}
+
+Getcity(){
+    this.GetLongitudeAndLatitude()
+    .then((posarr)=>{
+      const longitude = posarr[0];
+      const latitude  = posarr[1];
+      fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa77de5&location="+longitude+","+latitude+ "&poitype=城市&radius=1000&extensions=all&batch=false&roadlevel=0")
       .then(response=>response.json())
       .then(json=>{
-        // const data=JSON.stringify(json.regeocodes.formatted_address);
-            this.setState({
-              city:json.regeocode.formatted_address
-            })  
-      });
-    }, 0);
+      // const data=JSON.stringify(json.regeocodes.formatted_address);
+        this.setState({
+                city:json.regeocode.formatted_address
+              })  
+    })
+  })
+}
+
+  componentDidMount() {
+  this.Getcity();
+
+    // setTimeout(() => {
+    //   navigator.geolocation.getCurrentPosition(
+    //     (position) => {
+    //     const positionData=position.coords;
+    //     let initialPosition = JSON.stringify(position);
+            
+    //       this.setState({
+    //       Pos1:initialPosition,
+    //       Pos3:positionData.longitude,
+    //       Pos4:positionData.latitude,
+    //     })
+    //     },
+    //     (error) => alert(error.message),
+    //     {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
+    // );
+    
+    // this._watchID = navigator.geolocation.watchPosition((position)=> {
+    //     let lastPosition = JSON.stringify(position);
+    //     this.setState({
+    //         Pos2: lastPosition
+    //     });
+    // }, (error)=> {
+    //     alert(error.message)
+    // })
+    // }, 0);
+    // setTimeout(() => {
+    //   fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa77de5&location="+this.state.Pos3+","+this.state.Pos4+ "&poitype=城市&radius=1000&extensions=all&batch=false&roadlevel=0")
+    //   .then(response=>response.json())
+    //   .then(json=>{
+    //     // const data=JSON.stringify(json.regeocodes.formatted_address);
+    //         this.setState({
+    //           city:json.regeocode.formatted_address
+    //         })  
+    //   });
+    // }, 0);
 }
 
 
