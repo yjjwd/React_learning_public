@@ -1,5 +1,6 @@
 import  React,{Component} from 'react'
 import {Text,View,Image,TextInput,StyleSheet,Button } from 'react-native';
+import { MapView } from 'react-native-amap3d'
 
 // export default class HomeScreen extends Component{
 //     constructor(props){
@@ -127,9 +128,7 @@ Getcity(){
         //   </View>
         // </View>
         <View style={styles.container}>
-          <View style={styles.top}>
-            <Image style={{flex:1}} source={require('../images/gzmap.png')} />
-          </View>
+         <MapView style={styles.top} coordinate={{ latitude: 39.91095,longitude: 116.37296, }} />
           <View style={styles.middle}>
             <Text style={styles.item}>{this.state.city}</Text>
           </View>

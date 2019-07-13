@@ -9,6 +9,7 @@
   "dependencies": {
     "react": "16.8.3",
     "react-native": "0.59.9",
+    "react-native-amap3d": "^1.1.1",
     "react-native-flexi-radio-button": "^0.2.2",
     "react-native-video": "^4.4.2",
     "react-navigation": "^1.5.2"
