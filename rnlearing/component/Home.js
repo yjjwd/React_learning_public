@@ -1,6 +1,7 @@
 import  React,{Component} from 'react'
-import {Text,View,Image,TextInput,StyleSheet,Button } from 'react-native';
+import {Text,View,Image,TextInput,StyleSheet,Button ,FlatList} from 'react-native';
 import { MapView } from 'react-native-amap3d'
+import PropTypes from "prop-types";
 
 // export default class HomeScreen extends Component{
 //     constructor(props){
@@ -29,12 +30,13 @@ export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-        Pos1: '',
-        Pos2: '',
+        longtitude: '',
+        latitude: '',
         Pos3:'',
         Pos4:'',
         city:'',
-        test:''
+        test:'',
+        logs: []
     }
 }
 
@@ -63,7 +65,9 @@ Getcity(){
       .then(json=>{
       // const data=JSON.stringify(json.regeocodes.formatted_address);
         this.setState({
-                city:json.regeocode.formatted_address
+                city:json.regeocode.formatted_address,
+                latitude:latitude,
+                longtitude:longitude
               })  
     })
   })
@@ -108,9 +112,45 @@ Getcity(){
     //   });
     // }, 0);
 }
+//标识用函数
+_onMarkerPress = () => Alert.alert('onPress')
+_onInfoWindowPress = () => Alert.alert('onInfoWindowPress')
+_onDragEvent = ({ nativeEvent }) => Alert.alert(`${nativeEvent.latitude}, ${nativeEvent.longitude}`)
+//事件反馈用函数
+_log(event, data) {
+  this.setState({
+    logs: [
+      {
+        key: Date.now().toString(),
+        time: new Date().toLocaleString(),
+        event,
+        data: JSON.stringify(data, null, 2),
+      },
+      ...this.state.logs,
+    ],
+  })
+}
+
+_logPressEvent = ({ nativeEvent }) => this._log('onPress', nativeEvent)
+_logLongPressEvent = ({ nativeEvent }) => this._log('onLongPress', nativeEvent)
+_logLocationEvent = ({ nativeEvent }) => this._log('onLocation', nativeEvent)
+_logStatusChangeCompleteEvent = ({ nativeEvent }) => this._log('onStatusChangeComplete', nativeEvent)
+
+_renderItem = ({ item }) =>
+  <Text style={styles.logText}>{item.time} {item.event}: {item.data}</Text>
 
 
     render() {
+      const Pos ={
+        Mainpos:{
+        latitude: this.state.latitude*1,
+        longitude: this.state.longtitude*1
+      },
+      secpos:{
+        latitude: this.state.latitude*1-0.005,
+        longitude: this.state.longtitude*1-0.005
+      }
+      };
       return (
         // <View style={{flex: 1}}>
         //   <View style={{ flex: 6}}>
@@ -128,14 +168,44 @@ Getcity(){
         //   </View>
         // </View>
         <View style={styles.container}>
-         <MapView style={styles.top} coordinate={{ latitude: 39.91095,longitude: 116.37296, }} />
-          <View style={styles.middle}>
-            <Text style={styles.item}>{this.state.city}</Text>
-          </View>
-          <View style={styles.bottom}>
-           <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/>
-          </View>
+          <MapView
+        coordinate={Pos.Mainpos}
+        zoomLevel={18}
+        locationEnabled
+        locationInterval={10000}
+        distanceFilter={10}
+        onPress={this._logPressEvent}
+        onLongPress={this._logLongPressEvent}
+        onLocation={this._logLocationEvent}
+        onStatusChangeComplete={this._logStatusChangeCompleteEvent}
+        style={styles.top}
+        >
+            <MapView.Marker
+              draggable
+              title='这是一个可拖拽的标记'
+              onDragEnd={this._onDragEvent}
+               onInfoWindowPress={this._onInfoWindowPress}
+              coordinate={Pos.secpos}
+            />
+            <MapView.Marker image="car_icon" coordinate={Pos.Mainpos}>
+              <View style={styles.defaultbox}>
+              {/* <Image  source={require('../images/car_icon.png')} resizeMode={'contain'} /> */}
+                <Text>最近的出租车</Text>
+              </View>
+            </MapView.Marker>
+          </MapView>
+        <View style={styles.middle}>
+          <Text style={styles.item}>{this.state.city}</Text>
+        <FlatList
+          style={styles.logs}
+          data={this.state.logs}
+          renderItem={this._renderItem}
+        />
         </View>
+        <View style={styles.bottom}>
+         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/>
+        </View>
+      </View>
               )
     }
   }
@@ -189,7 +259,25 @@ const styles=StyleSheet.create(
             height: 50,
             lineHeight: 50,
             textAlign: 'center',
-   
-        }
+        },
+        defaultbox:{
+          width:90,
+          backgroundColor:"pink",
+          margin: 20,
+        } ,
+         body: {
+          flex: 1,
+        },
+        logs: {
+          elevation: 8,
+          flex: 1,
+          backgroundColor: '#fff',
+        },
+        logText: {
+          paddingLeft: 15,
+          paddingRight: 15,
+          paddingTop: 10,
+          paddingBottom: 10,
+        },
     }
 );
