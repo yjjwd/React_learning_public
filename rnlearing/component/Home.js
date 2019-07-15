@@ -2,7 +2,7 @@ import  React,{Component} from 'react'
 import {Text,View,Image,TextInput,StyleSheet,Button ,FlatList} from 'react-native';
 import { MapView } from 'react-native-amap3d'
 import PropTypes from "prop-types";
-
+import NowAndToGo from './NowAndTogo'
 // export default class HomeScreen extends Component{
 //     constructor(props){
 //         super(props)
@@ -30,13 +30,17 @@ export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-        longtitude: '',
+        longitude: '',
         latitude: '',
+        Nowlongitude: '',
+        Nowlatitude: '',
         Pos3:'',
         Pos4:'',
         city:'',
         test:'',
-        logs: []
+        logs: [],
+        NowLocation:'',
+        Togo:''
     }
 }
 
@@ -67,7 +71,7 @@ Getcity(){
         this.setState({
                 city:json.regeocode.formatted_address,
                 latitude:latitude,
-                longtitude:longitude
+                longitude:longitude
               })  
     })
   })
@@ -131,26 +135,69 @@ _log(event, data) {
   })
 }
 
-_logPressEvent = ({ nativeEvent }) => this._log('onPress', nativeEvent)
+
+_logPressEvent = ({ nativeEvent }) => {
+  this._log('onPress', nativeEvent)
+  const longitude = nativeEvent.longitude;
+  const latitude  =nativeEvent.latitude;
+ if(nativeEvent.longitude!=this.state.Nowlongitude&&nativeEvent.latitude!=this.state.Nowlatitude){
+  this.setState({
+    Nowlongitude:nativeEvent.longitude,
+    Nowlatitude:nativeEvent.latitude,
+},()=>{ 
+fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa77de5&location="+longitude+","+latitude+ "&poitype=城市&radius=1000&extensions=all&batch=false&roadlevel=0")
+.then(response=>response.json())
+.then(json=>{
+ this.setState({
+         Togo:json.regeocode.formatted_address,
+       })  
+ })})
+}
+}
+
 _logLongPressEvent = ({ nativeEvent }) => this._log('onLongPress', nativeEvent)
 _logLocationEvent = ({ nativeEvent }) => this._log('onLocation', nativeEvent)
-_logStatusChangeCompleteEvent = ({ nativeEvent }) => this._log('onStatusChangeComplete', nativeEvent)
+_logStatusChangeCompleteEvent = ({ nativeEvent }) =>
+ {
+   this._log('onStatusChangeComplete', nativeEvent)
+  }
+
+  NowLocationChange=({nativeEvent})=>{
+    const longitude = nativeEvent.longitude;
+    const latitude  =nativeEvent.latitude;
+   if(nativeEvent.longitude!=this.state.longitude&&nativeEvent.latitude!=this.state.latitude){
+    this.setState({
+      longitude:nativeEvent.longitude,
+      latitude:nativeEvent.latitude,
+ },()=>{ 
+  fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa77de5&location="+longitude+","+latitude+ "&poitype=城市&radius=1000&extensions=all&batch=false&roadlevel=0")
+ .then(response=>response.json())
+ .then(json=>{
+   this.setState({
+           city:json.regeocode.formatted_address,
+         })  
+   })})
+  }
+}
 
 _renderItem = ({ item }) =>
   <Text style={styles.logText}>{item.time} {item.event}: {item.data}</Text>
 
-
+  Search()
+  {
+    this.props.navigation.navigate('Search');
+  }
     render() {
       const Pos ={
         Mainpos:{
         latitude: this.state.latitude*1,
-        longitude: this.state.longtitude*1
+        longitude: this.state.longitude*1
       },
       secpos:{
-        latitude: this.state.latitude*1-0.005,
-        longitude: this.state.longtitude*1-0.005
+        latitude: this.state.Nowlatitude*1,
+        longitude: this.state.Nowlongitude*1
       }
-      };
+      }
       return (
         // <View style={{flex: 1}}>
         //   <View style={{ flex: 6}}>
@@ -177,12 +224,12 @@ _renderItem = ({ item }) =>
         onPress={this._logPressEvent}
         onLongPress={this._logLongPressEvent}
         onLocation={this._logLocationEvent}
-        onStatusChangeComplete={this._logStatusChangeCompleteEvent}
+        onStatusChangeComplete={this.NowLocationChange}
         style={styles.top}
         >
             <MapView.Marker
               draggable
-              title='这是一个可拖拽的标记'
+              title='我要去'
               onDragEnd={this._onDragEvent}
                onInfoWindowPress={this._onInfoWindowPress}
               coordinate={Pos.secpos}
@@ -195,14 +242,21 @@ _renderItem = ({ item }) =>
             </MapView.Marker>
           </MapView>
         <View style={styles.middle}>
-          <Text style={styles.item}>{this.state.city}</Text>
-        <FlatList
+          {/* <Text style={styles.item}>{this.state.city}</Text> */}
+        {/* <FlatList
           style={styles.logs}
           data={this.state.logs}
           renderItem={this._renderItem}
-        />
+        /> */}
+        <Text style={styles.input}>当前位置:{this.state.city}</Text>
+        <View style={{flex:1 ,justifyContent:'center'}}>
+                <TextInput style={styles.input} onChangeText={(NowLocation) => { this.setState({NowLocation}) }} value={this.state.NowLocation} placeholder={'我的位置'}></TextInput>
+                <TextInput style={styles.input} onChangeText={(Togo) => { this.setState({Togo}) }} value={this.state.Togo} placeholder={'我想去'}></TextInput>
+                <Text style={styles.login} onPress={ () => {this.Move()} }>Move</Text>
+            </View>
         </View>
         <View style={styles.bottom}>
+        <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} color='purple' onPress={() => this.props.navigation.navigate('Search')} title="搜索功能预览"/>
          <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/>
         </View>
       </View>
@@ -239,15 +293,14 @@ const styles=StyleSheet.create(
            fontSize: 30,
             width: 500,
         },
-        input:{
-            fontSize: 20,
-            width: 300,
-            margin: 10,
-            borderBottomWidth: 1,
-            borderStyle: 'solid',
-            borderColor: '#841584',
-            padding: 5,
-            marginBottom:20
+        input: {
+          fontSize: 20,
+          width: 500,
+          margin: 10,
+          borderBottomWidth: 1,
+          borderStyle: 'solid',
+          borderColor: '#841584',
+          padding: 5
         },
         login:{
             fontSize:24,

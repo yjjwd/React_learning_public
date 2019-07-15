@@ -13,6 +13,7 @@ import {StackNavigator} from 'react-navigation'
 
 import HomeScreen from './component/Home'
 import LoginScreen from './component/Login'
+import Search from './component/Search'
 
 import {AppNavigator}  from './component/TabNavigation'
 
@@ -27,6 +28,9 @@ const App = StackNavigator({
   },
   Main: {
     screen: AppNavigator,
+  },
+  Search:{
+    screen:Search,
   }
 }, {
   initialRouteName: 'Home',
