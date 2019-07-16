@@ -40,7 +40,9 @@ export default class HomeScreen extends React.Component {
         test:'',
         logs: [],
         NowLocation:'',
-        Togo:''
+        Togo:'',
+        Searchlocation:'',
+        findpath:false
     }
 }
 
@@ -73,8 +75,17 @@ Getcity(){
                 latitude:latitude,
                 longitude:longitude
               })  
+    }).catch((error)=>{
+      console.log('request failed', error)
     })
   })
+}
+
+_GetSearchValue(val) //同页面子传父用函数
+{
+  this.setState({
+    Searchlocation:val
+});
 }
 
   componentDidMount() {
@@ -151,7 +162,10 @@ fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa
  this.setState({
          Togo:json.regeocode.formatted_address,
        })  
- })})
+ }).catch((error)=>{
+  console.log('request failed', error)
+})
+})
 }
 }
 
@@ -176,7 +190,10 @@ _logStatusChangeCompleteEvent = ({ nativeEvent }) =>
    this.setState({
            city:json.regeocode.formatted_address,
          })  
-   })})
+   }).catch((error)=>{
+    console.log('request failed', error)
+    })
+  })
   }
 }
 
@@ -186,6 +203,32 @@ _renderItem = ({ item }) =>
   Search()
   {
     this.props.navigation.navigate('Search');
+  }
+  componentWillMount()
+  {
+    const { params } = this.props.navigation.state;
+    const Searchlocation = params ? params.Searchlocation : null;
+    if(Searchlocation)
+    {
+      this.setState({
+      Searchlocation:Searchlocation,
+       },()=>{ 
+        fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa77de5&location="+Searchlocation+ "&poitype=城市&radius=1000&extensions=all&batch=false&roadlevel=0")
+       .then(response=>response.json())
+       .then(json=>{
+         this.setState({
+                 Togo:json.regeocode.formatted_address,
+               })  
+         }).catch((error)=>{
+          console.log('request failed', error)
+      })
+        })
+      }
+      if(NowLocation&&Togo)
+      {
+        this.setState({findpath:true})
+        //根据经纬度计算距离后调整地图缩放比例（存在bug暂时移除）
+      }
   }
     render() {
       const Pos ={
@@ -197,7 +240,12 @@ _renderItem = ({ item }) =>
         latitude: this.state.Nowlatitude*1,
         longitude: this.state.Nowlongitude*1
       }
-      }
+    }
+
+      //测试navigatin传值用
+      // const { params } = this.props.navigation.state;
+      // const Searchlocation = params ? params.Searchlocation : null;
+      //！！！严重错误，不要在render里setstate,会导致无限重构
       return (
         // <View style={{flex: 1}}>
         //   <View style={{ flex: 6}}>
@@ -249,6 +297,7 @@ _renderItem = ({ item }) =>
           renderItem={this._renderItem}
         /> */}
         <Text style={styles.input}>当前位置:{this.state.city}</Text>
+        <Text style={styles.input}>传值测试:{this.state.Searchlocation}</Text>
         <View style={{flex:1 ,justifyContent:'center'}}>
                 <TextInput style={styles.input} onChangeText={(NowLocation) => { this.setState({NowLocation}) }} value={this.state.NowLocation} placeholder={'我的位置'}></TextInput>
                 <TextInput style={styles.input} onChangeText={(Togo) => { this.setState({Togo}) }} value={this.state.Togo} placeholder={'我想去'}></TextInput>

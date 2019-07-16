@@ -25,7 +25,8 @@ export default class CourseItem extends Component {
       </View>
     );
   }
-}
+};
+
 
 const styles = StyleSheet.create({
   container: {
@@ -53,5 +54,8 @@ const styles = StyleSheet.create({
     lineHeight: 21,
     textAlign: 'justify',
     marginTop: 5
+  },
+  item: {
+    height: 180
   }
 });
