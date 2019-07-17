@@ -10,7 +10,10 @@ export default class Mylist extends React.Component{
       }
   
       render() {
-        return (
+        // if (!this.state.movies) {
+        //   return this.renderLoadingView()
+        // }
+      return (
           <View style={styles.container}>
             <View style={styles.course}>
               <Text style={styles.title}>{this.state.name}</Text>
@@ -18,6 +21,15 @@ export default class Mylist extends React.Component{
                   <Text>{this.state.address}</Text>
               </View>
             </View>
+          </View>
+        );
+      }
+      renderLoadingView() {
+        return (
+          <View style={styles.container}>
+            <Text>
+              正在搜索数据……
+            </Text>
           </View>
         );
       }

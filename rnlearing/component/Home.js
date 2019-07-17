@@ -42,8 +42,27 @@ export default class HomeScreen extends React.Component {
         NowLocation:'',
         Togo:'',
         Searchlocation:'',
-        findpath:false
+        findpath:false,
+        zoom:18
     }
+}
+
+getRad(d){
+  return d*PI/180.0;
+}
+//暂时使用的数学计算方法，在完善车辆统计后将替换为高德api的附近派单自带计算距离
+ getGreatCircleDistance(lat1,lng1,lat2,lng2){
+  var radLat1 = getRad(lat1)
+  var radLat2 = getRad(lat2);
+  
+  var a = radLat1 - radLat2;
+  var b = getRad(lng1) - getRad(lng2);
+  
+  var s = 2*Math.asin(Math.sqrt(Math.pow(Math.sin(a/2),2) + Math.cos(radLat1)*Math.cos(radLat2)*Math.pow(Math.sin(b/2),2)));
+  s = s*EARTH_RADIUS;
+  s = Math.round(s*10000)/10000.0;
+          
+  return s;
 }
 
  GetLongitudeAndLatitude = () => {
@@ -224,10 +243,16 @@ _renderItem = ({ item }) =>
       })
         })
       }
-      if(NowLocation&&Togo)
+      if(this.state.NowLocation&&this.state.Togo)
       {
         this.setState({findpath:true})
-        //根据经纬度计算距离后调整地图缩放比例（存在bug暂时移除）
+        var distance=this.getGreatCircleDistance(this.state.latitude,this.state.longitude,this.state.Nowlatitude,this.state.Nowlongitude)
+        this.setState({test:distance})
+        if(0<=distance<=100) this.setState({zoom:18})
+        if(100<=distance<=1000) this.setState({zoom:17})
+        if(1000<=distance<=10000) this.setState({zoom:16})
+        if(10000<=distance<=100000) this.setState({zoom:15})
+        else this.setState({zoom:10})
       }
   }
     render() {
@@ -265,7 +290,7 @@ _renderItem = ({ item }) =>
         <View style={styles.container}>
           <MapView
         coordinate={Pos.Mainpos}
-        zoomLevel={18}
+        zoomLevel={this.state.zoom}
         locationEnabled
         locationInterval={10000}
         distanceFilter={10}
@@ -297,7 +322,8 @@ _renderItem = ({ item }) =>
           renderItem={this._renderItem}
         /> */}
         <Text style={styles.input}>当前位置:{this.state.city}</Text>
-        <Text style={styles.input}>传值测试:{this.state.Searchlocation}</Text>
+        {/* <Text style={styles.input}>传值测试:{this.state.Searchlocation}</Text> */}
+        <Text style={styles.input}>计算距离:{this.state.test}</Text>
         <View style={{flex:1 ,justifyContent:'center'}}>
                 <TextInput style={styles.input} onChangeText={(NowLocation) => { this.setState({NowLocation}) }} value={this.state.NowLocation} placeholder={'我的位置'}></TextInput>
                 <TextInput style={styles.input} onChangeText={(Togo) => { this.setState({Togo}) }} value={this.state.Togo} placeholder={'我想去'}></TextInput>
