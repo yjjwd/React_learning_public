@@ -50,6 +50,7 @@ export default class HomeScreen extends React.Component {
         zoom:18,
         monted:false,
         searched:false,
+        counter:0
     }
 }
 
@@ -114,6 +115,7 @@ _GetSearchValue(val) //同页面子传父用函数
 }
 
   componentDidMount() {
+    this.setState({counter:this.state.counter+1})
     if(!this.state.monted)
     {
         this.Getcity();
@@ -286,10 +288,10 @@ _renderItem = ({ item }) =>
         this.setState({findpath:true})
         var distance=this.getGreatCircleDistance(this.state.Nowlatitude,this.state.Nowlongitude,this.state.Togolatitude,this.state.Togolongitude)
         this.setState({test:distance})
-        if(0<=distance<=100) this.setState({zoom:18})
-        if(100<=distance<=1000) this.setState({zoom:17})
-        if(1000<=distance<=10000) this.setState({zoom:16})
-        if(10000<=distance<=100000) this.setState({zoom:15})
+        if(0<=distance<100) this.setState({zoom:18})
+        else if(100<=distance<1000) this.setState({zoom:17})
+        else if(1000<=distance<10000) this.setState({zoom:16})
+        else if(10000<=distance<100000) this.setState({zoom:15})
         else this.setState({zoom:10})
       }
   }
@@ -379,7 +381,7 @@ Postdata(e)
         /> */}
         {/* <Text style={styles.input}>测试{this.state.mode}+{this.state.test1}+{this.state.test2}+{this.state.Searchlocation},{this.state.Nowlatitude}</Text> */}
         {/* <Text style={styles.input}>传值测试:{this.state.NowLocation}</Text> */}
-        {/* <Text style={styles.input}>计算距离:{this.state.test}</Text> */}
+        <Text style={styles.input}>重构次数:{this.state.counter}</Text>
         <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
                 <Text style={styles.input} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
                 <Text style={styles.input} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>

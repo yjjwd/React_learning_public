@@ -17,9 +17,16 @@ import Search from './component/Search'
 
 import {AppNavigator}  from './component/TabNavigation'
 
+const HomeNavigator =StackNavigator(
+  {
+    Home:HomeScreen,
+    Search:Search
+  }
+)
+
 const App = StackNavigator({
   Home: {
-    screen: HomeScreen,
+    screen: HomeNavigator,
     navigationOptions: ({navigation}) => ({header: null})
   },
   Login: {
@@ -28,9 +35,6 @@ const App = StackNavigator({
   },
   Main: {
     screen: AppNavigator,
-  },
-  Search:{
-    screen:Search,
   }
 }, {
   initialRouteName: 'Home',
