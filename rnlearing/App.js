@@ -9,24 +9,24 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View} from 'react-native';
 
-import {StackNavigator} from 'react-navigation'
+import {createStackNavigator, createAppContainer,createNavigationContainer} from 'react-navigation'
 
 import HomeScreen from './component/Home'
 import LoginScreen from './component/Login'
 import Search from './component/Search'
 
-import {AppNavigator}  from './component/TabNavigation'
+import {TabAppNavigator}  from './component/TabNavigation'
 
-const HomeNavigator =StackNavigator(
+const HomeNavigator =createStackNavigator(
   {
     Home:HomeScreen,
     Search:Search
   }
 )
 
-const App = StackNavigator({
+const AppNavigator = createStackNavigator({
   Home: {
-    screen: HomeNavigator,
+    screen:HomeNavigator,
     navigationOptions: ({navigation}) => ({header: null})
   },
   Login: {
@@ -34,14 +34,23 @@ const App = StackNavigator({
     navigationOptions: ({navigation}) => ({header: null})
   },
   Main: {
-    screen: AppNavigator,
-  }
+    screen: TabAppNavigator,
+  },
+  // Search:{
+  //   screen:Search
+  // }
 }, {
   initialRouteName: 'Home',
   headerMode: 'screen'
 })
 
+const AppContainer = createAppContainer(AppNavigator);
 
+export default class App extends React.Component {
+  render() {
+    return <AppContainer />;
+  }
+}
 
 // const styles = StyleSheet.create({
 //   container: {
@@ -57,9 +66,9 @@ const App = StackNavigator({
 //   },
 //   instructions: {
 //     textAlign: 'center',
-//     color: '#333333',
+//     color: '#333333',  
 //     marginBottom: 5,
 //   },
 // });
 
-export default App;
+// export default App;

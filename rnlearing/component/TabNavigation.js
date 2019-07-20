@@ -2,9 +2,9 @@ import React from 'react'
 import MineScreen from './Mine'
 import TeacherScreen from './Teacher'
 import AssessScreen from './Assess'
-import { TabNavigator } from 'react-navigation'
+import { TabNavigator,createBottomTabNavigator } from 'react-navigation'
 
-export const AppNavigator = TabNavigator(
+export const TabAppNavigator = createBottomTabNavigator(
   {
     Mine: { screen: MineScreen },
     Teacher: { screen: TeacherScreen },
