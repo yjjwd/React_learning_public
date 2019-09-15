@@ -3,24 +3,7 @@ import {Text,View,Image,TextInput,StyleSheet,Button ,TouchableOpacity,FlatList} 
 import { MapView } from 'react-native-amap3d'
 import PropTypes from "prop-types";
 import NowAndToGo from './NowAndTogo'
-// export default class HomeScreen extends Component{
-//     constructor(props){
-//         super(props)
-//         this.state={
-
-//         }
-//     }
-//     componentDidMount(){}
-
-//     render(){
-//         return(
-//             <View style ={styles.container}>
-//               <Text style={styles.titl}>这是一个主页</Text>
-//             </View>
-//         );
-//     }
-// }
-
+import {NavigationEvents} from 'react-navigation'
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -36,28 +19,25 @@ export default class HomeScreen extends React.Component {
         Nowlatitude: '',
         Togolongitude:'',
         Togolatitude:'',
-        Pos3:'',
-        Pos4:'',
         city:'',
         test1:'null',
         test2:'null',
         logs: [],
         NowLocation:'当前位置',
-        mode:'',
+        mode:'null',
         Togo:'我想去',
         Searchlocation:'',
         findpath:false,
         zoom:18,
         monted:false,
         searched:false,
-        counter:0
     }
 }
 
 getRad(d){
   return d*3.1415926/180.0;
 }
-//暂时使用的数学计算方法，在完善车辆统计后将替换为高德api的附近派单自带计算距离
+//暂时使用的数学计算方法
  getGreatCircleDistance(lat1,lng1,lat2,lng2){
   var radLat1 = this.getRad(lat1)
   var radLat2 = this.getRad(lat2);
@@ -95,7 +75,6 @@ Getcity(){
       fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa77de5&location="+longitude+","+latitude+ "&poitype=城市&radius=1000&extensions=all&batch=false&roadlevel=0")
       .then(response=>response.json())
       .then(json=>{
-      // const data=JSON.stringify(json.regeocodes.formatted_address);
         this.setState({
                 city:json.regeocode.formatted_address,
                 latitude:latitude,
@@ -121,42 +100,6 @@ _GetSearchValue(val) //同页面子传父用函数
         this.Getcity();
         this.setState({monted:true})
     }
-
-    // setTimeout(() => {
-    //   navigator.geolocation.getCurrentPosition(
-    //     (position) => {
-    //     const positionData=position.coords;
-    //     let initialPosition = JSON.stringify(position);
-            
-    //       this.setState({
-    //       Pos1:initialPosition,
-    //       Pos3:positionData.longitude,
-    //       Pos4:positionData.latitude,
-    //     })
-    //     },
-    //     (error) => alert(error.message),
-    //     {enableHighAccuracy: true, timeout: 20000, maximumAge: 1000}
-    // );
-    
-    // this._watchID = navigator.geolocation.watchPosition((position)=> {
-    //     let lastPosition = JSON.stringify(position);
-    //     this.setState({
-    //         Pos2: lastPosition
-    //     });
-    // }, (error)=> {
-    //     alert(error.message)
-    // })
-    // }, 0);
-    // setTimeout(() => {
-    //   fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa77de5&location="+this.state.Pos3+","+this.state.Pos4+ "&poitype=城市&radius=1000&extensions=all&batch=false&roadlevel=0")
-    //   .then(response=>response.json())
-    //   .then(json=>{
-    //     // const data=JSON.stringify(json.regeocodes.formatted_address);
-    //         this.setState({
-    //           city:json.regeocode.formatted_address
-    //         })  
-    //   });
-    // }, 0);
 }
 //标识用函数
 _onMarkerPress = () => Alert.alert('onPress')
@@ -198,6 +141,7 @@ fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa
 })
 })
 }
+this.CheckMap()
 }
 
 _logLongPressEvent = ({ nativeEvent }) => this._log('onLongPress', nativeEvent)
@@ -210,8 +154,8 @@ _logStatusChangeCompleteEvent = ({ nativeEvent }) =>
   NowLocationChange=({nativeEvent})=>{
     const longitude = nativeEvent.longitude;
     const latitude  =nativeEvent.latitude;
-    if(this.state.searched==true) this.setState({searched:false})
-   else if(nativeEvent.longitude!=this.state.longitude&&nativeEvent.latitude!=this.state.latitude){
+    if(this.state.searched==true) this.setState({test:false}) //暂时弃用搜索标记
+   else if(nativeEvent.longitude!=this.state.Nowlongitude||nativeEvent.Nowlatitude!=this.state.latitude){
     this.setState({
       Nowlongitude:nativeEvent.longitude,
       Nowlatitude:nativeEvent.latitude,
@@ -228,6 +172,7 @@ _logStatusChangeCompleteEvent = ({ nativeEvent }) =>
     })
   })
   }
+  this.CheckMap()
 }
 
 _renderItem = ({ item }) =>
@@ -238,11 +183,8 @@ _renderItem = ({ item }) =>
     this.props.navigation.navigate('Search');
   }
 
-  componentWillMount()
+  SearchCallBack(mode,Searchlocation)
   {
-    const { params } = this.props.navigation.state;
-    const Searchlocation = params ? params.Searchlocation : null;
-    const mode=params ? params.Mode:null;
     if(Searchlocation)
     {
       const arr =Searchlocation.split(',')
@@ -254,11 +196,9 @@ _renderItem = ({ item }) =>
       mode:mode,
       searched:true,
        },()=>{ 
-        //  this.setState({test1:'oh'})
         fetch("https://restapi.amap.com/v3/geocode/regeo?key=4df0ef52b83b532834ffa118afa77de5&location="+Searchlocation+ "&poitype=城市&radius=1000&extensions=all&batch=false&roadlevel=0")
        .then(response=>response.json())
        .then(json=>{
-        // this.setState({test1:'ohhh'})
         if(mode=='Now')
          {
           this.setState({
@@ -275,37 +215,46 @@ _renderItem = ({ item }) =>
              Togolatitude:arr[1],
            })  
           }
-
       }
          ).catch((error)=>{
           console.log('request failed', error)
       })
         });
-
       }
-      if(this.state.NowLocation&&this.state.Togo)
+      this.CheckMap()
+  }
+  CheckMap()
+    {
+      if(this.state.Nowlatitude&&this.state.Togolatitude)
       {
         this.setState({findpath:true})
         var distance=this.getGreatCircleDistance(this.state.Nowlatitude,this.state.Nowlongitude,this.state.Togolatitude,this.state.Togolongitude)
-        this.setState({test:distance})
-        if(0<=distance<100) this.setState({zoom:18})
-        else if(100<=distance<1000) this.setState({zoom:17})
-        else if(1000<=distance<10000) this.setState({zoom:16})
-        else if(10000<=distance<100000) this.setState({zoom:15})
-        else this.setState({zoom:10})
+        this.setState({test:distance,zoom:3})
+        if(distance<=500) {this.setState({zoom:18})}
+        else if(distance<=1000) {this.setState({zoom:15})}
+        else if(distance<=10000) {this.setState({zoom:10})}
+        else if(distance<=100000) {this.setState({zoom:8})}
+        else if(distance<=1000000) {this.setState({zoom:7})}
+        else if(distance<=1000000) {this.setState({zoom:4})}
+        else this.setState({zoom:4})
       }
-  }
+    }
 
 Postdata(e)
 {
   if(e=='Now')
   {
-    this.props.navigation.navigate('Search',{Mode:'Now',Data:this.state.NowLocation})
+    this.props.navigation.navigate('Search',{Mode:'Now',Data:this.state.NowLocation,callback:(mode,Searchlocation)=>{this.SearchCallBack(mode,Searchlocation)} })
   }
   if(e=='To')
   {
-    this.props.navigation.navigate('Search',{Mode:'To',Data:this.state.Togo})
+    this.props.navigation.navigate('Search',{Mode:'To',Data:this.state.Togo,callback:(mode,Searchlocation)=>{this.SearchCallBack(mode,Searchlocation)}})
   }
+}
+
+componentWillMount()
+{
+
 }
 
     render() {
@@ -325,26 +274,11 @@ Postdata(e)
 
     }
 
-      //测试navigatin传值用
-      // const { params } = this.props.navigation.state;
-      // const Searchlocation = params ? params.Searchlocation : null;
+    const { navigation } = this.props;
+    const mode =navigation.getParam('Mode', null);
+    const Searchlocation = navigation.getParam('Searchlocation',null)
       //！！！严重错误，不要在render里setstate,会导致无限重构
       return (
-        // <View style={{flex: 1}}>
-        //   <View style={{ flex: 6}}>
-        //     <Image style={{flex:1}} source={require('../images/gzmap.png')} />
-        //   </View>
-        //   <View style={{flex:3,flexDirection:'column',justifyContent:'space-evenly'}}>
-        //     <Text>{this.state.Pos1}</Text>
-        //     <Text>{this.state.Pos2}</Text>
-        //     <Text>{this.state.Pos3}</Text>
-        //     <Text>{this.state.Pos4}</Text>
-        //     <Text>{this.state.city}</Text>
-        //   </View>
-        //   <View style={{flex:1,justifyContent: 'flex-end'}}>
-        //    <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/>
-        //   </View>
-        // </View>
         <View style={styles.container}>
           <MapView
           coordinate={Pos.Mainpos}
@@ -356,6 +290,9 @@ Postdata(e)
           onLongPress={this._logLongPressEvent}
           onLocation={this._logLocationEvent}
           onStatusChangeComplete={this.NowLocationChange}
+	        showsScale={true}
+	        showsLocationButton={true}
+	        showsZoomControls={true}
           style={styles.top}
           >
             <MapView.Marker
@@ -367,29 +304,19 @@ Postdata(e)
             />
             <MapView.Marker image="flag" coordinate={Pos.Nowpos}>
               <View style={styles.defaultbox}>
-              {/* <Image  source={require('../images/car_icon.png')} resizeMode={'contain'} /> */}
                 <Text>我的位置</Text>
               </View>
             </MapView.Marker>
           </MapView>
         <View style={styles.middle}>
-          {/* <Text style={styles.item}>{this.state.city}</Text> */}
-        {/* <FlatList
-          style={styles.logs}
-          data={this.state.logs}
-          renderItem={this._renderItem}
-        /> */}
-        {/* <Text style={styles.input}>测试{this.state.mode}+{this.state.test1}+{this.state.test2}+{this.state.Searchlocation},{this.state.Nowlatitude}</Text> */}
-        {/* <Text style={styles.input}>传值测试:{this.state.NowLocation}</Text> */}
-        <Text style={styles.input}>重构次数:{this.state.counter}</Text>
+        <Text style={styles.input}>测试:{this.state.mode}+{this.state.test}+{this.state.zoom}</Text>
         <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
                 <Text style={styles.input} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
                 <Text style={styles.input} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
-                <Text style={styles.login} onPress={ () => {this.Move()} }>Move</Text>
+                <Text style={styles.login} onPress={(event) => {this.Move()} }>Move</Text>
         </TouchableOpacity>
         </View>
         <View style={styles.bottom}>
-        {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} color='purple' onPress={() => this.props.navigation.navigate('Search')} title="搜索功能预览"/> */}
          <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/>
         </View>
       </View>
