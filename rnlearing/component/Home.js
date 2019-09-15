@@ -154,7 +154,7 @@ _logStatusChangeCompleteEvent = ({ nativeEvent }) =>
   NowLocationChange=({nativeEvent})=>{
     const longitude = nativeEvent.longitude;
     const latitude  =nativeEvent.latitude;
-    if(this.state.searched==true) this.setState({test:false}) //暂时弃用搜索标记
+    if(this.state.searched==true) this.setState({searched:false})
    else if(nativeEvent.longitude!=this.state.Nowlongitude||nativeEvent.Nowlatitude!=this.state.latitude){
     this.setState({
       Nowlongitude:nativeEvent.longitude,
@@ -225,17 +225,16 @@ _renderItem = ({ item }) =>
   }
   CheckMap()
     {
-      if(this.state.Nowlatitude&&this.state.Togolatitude)
+      if(this.state.NowLocation&&this.state.Togo)
       {
         this.setState({findpath:true})
         var distance=this.getGreatCircleDistance(this.state.Nowlatitude,this.state.Nowlongitude,this.state.Togolatitude,this.state.Togolongitude)
         this.setState({test:distance,zoom:3})
         if(distance<=500) {this.setState({zoom:18})}
-        else if(distance<=1000) {this.setState({zoom:15})}
-        else if(distance<=10000) {this.setState({zoom:10})}
-        else if(distance<=100000) {this.setState({zoom:8})}
-        else if(distance<=1000000) {this.setState({zoom:7})}
-        else if(distance<=1000000) {this.setState({zoom:4})}
+        else if(distance<=1000) {this.setState({zoom:17})}
+        else if(distance<=10000) {this.setState({zoom:16})}
+        else if(distance<=100000) {this.setState({zoom:15})}
+        //中间几级暂时跳过
         else this.setState({zoom:4})
       }
     }
