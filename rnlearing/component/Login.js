@@ -21,6 +21,17 @@ export default class LoginScreen extends Component{
                 alert('账号或密码错误')
             }
     }
+    Test(){
+        
+        const data = {
+            'action': 'register',
+            'r_username': 'Admin',
+            'r_password': '666'
+        }
+        // fetch("https://www.kingdom174.work",{method:'GET',body:JSON.stringify(data)})   
+        // .then(response => response.json()) // parses response to JSON
+        fetch("https://localhost:8080/register?action=register&r_username=lishiyun2&r_password=678",{method:'GET'})   
+    }
     render(){
         return(
             <View style ={styles.container}>
@@ -33,7 +44,7 @@ export default class LoginScreen extends Component{
                 onChangeText={(password)=>this.setState({password})}
                 value={this.state.password}
                 placeholder={'请输入密码(admin)'}/>
-                <Text style={styles.login} onPress={()=>{this.login()}}>Login</Text>
+                <Text style={styles.login} onPress={()=>{this.Test()}}>Login</Text>
                 <Text style={styles.login} onPress={() => this.props.navigation.navigate('Home')}>ToHome</Text>
             </View>
         );

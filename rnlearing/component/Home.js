@@ -317,7 +317,8 @@ componentWillMount()
         </TouchableOpacity>
         </View>
         <View style={styles.bottom}>
-         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/>
+         {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/> */}
+         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Login')} title="登陆测试"/>
         </View>
       </View>
               )
