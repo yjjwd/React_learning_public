@@ -31,6 +31,26 @@ export default class HomeScreen extends React.Component {
         zoom:18,
         monted:false,
         searched:false,
+        testlog:[1,2,3,4],
+        temp:'',
+        testroute:[
+          {
+            latitude: 23.0430,
+            longitude: 113.3649,
+          },
+          {
+            latitude: 25.806901,
+            longitude: 114.257972,
+          },
+          {
+            latitude: 26.806901,
+            longitude: 115.457972,
+          },
+          {
+            latitude: 27.806901,
+            longitude: 114.597972,
+          },
+        ],
     }
 }
 
@@ -251,6 +271,72 @@ Postdata(e)
     this.props.navigation.navigate('Search',{Mode:'To',Data:this.state.Togo,callback:(mode,Searchlocation)=>{this.SearchCallBack(mode,Searchlocation)}})
   }
 }
+ //定义全局object数组
+_routeline = 
+[
+  {
+    latitude: 23.0450,
+    longitude: 113.3639,
+  },
+  {
+    latitude: 23.0450,
+    longitude: 113.3639,
+  },
+  ]
+
+// Convert(str)
+// {
+//     for(var i=0;i<def.length;i++)
+//     {
+//       var temp = def[i].split(",")
+//       this._routeline[i]= "latitude:"+temp[0]+','+"longitude"+temp[1]+','+'!'
+//       this.setState({test:"avc"})
+//     }
+// }
+
+Route()
+{
+  fetch("https://restapi.amap.com/v3/direction/driving?key=4df0ef52b83b532834ffa118afa77de5&origin=116.481028,39.989643&destination=116.434446,39.90816&originid=&destinationid=&extensions=base&strategy=0&waypoints=116.357483,39.907234&avoidpolygons=&avoidroad=")
+  .then(response=>response.json())
+  .then(json=>{
+    this.setState({temp:json.route.paths[0].steps[0].polyline})
+    // this.Convert(this.state.temp)
+    // this.setState({test:this._routeline})
+    const def = String(this.state.temp).split(';') //将原始数据按分号隔开，每组为latitude，longitude
+
+    for(var i=0;i<def.length;i++) //循环
+    {
+      const temp = String(def[i]).split(",") //再次分割，0为latitude,1为longitude
+      this._routeline[i].latitude=temp[0]
+      this._routeline[i].longitude=temp[1]
+      this.setState({test:temp[1]})
+    }
+    const a=[
+      {
+        latitude: 23.0450,
+        longitude: 113.3639,
+      },
+      {
+        latitude: 25.806901,
+        longitude: 114.257972,
+      },
+      {
+        latitude: 26.806901,
+        longitude: 115.457972,
+      },
+      {
+        latitude: 27.806901,
+        longitude: 114.597972,
+      },
+    ]
+    // const arry = this._routeline.split(";")
+    this.setState({testroute:a,testlog:this._routeline[1].latitude})//读不出来
+ }
+    ).catch((error)=>{
+     console.log('request failed', error)
+ })
+
+}
 
 componentWillMount()
 {
@@ -273,7 +359,24 @@ componentWillMount()
         },
 
     }
-
+    const _routeline1=[
+	    {
+	      latitude: 23.0430,
+	      longitude: 113.3649,
+	    },
+	    {
+	      latitude: 25.806901,
+	      longitude: 114.257972,
+	    },
+	    {
+	      latitude: 26.806901,
+	      longitude: 115.457972,
+	    },
+	    {
+	      latitude: 27.806901,
+	      longitude: 114.597972,
+	    },
+	  ]
     const { navigation } = this.props;
     const mode =navigation.getParam('Mode', null);
     const Searchlocation = navigation.getParam('Searchlocation',null)
@@ -307,9 +410,14 @@ componentWillMount()
                 <Text>我的位置</Text>
               </View>
             </MapView.Marker>
+            <MapView.Polyline
+	          width={5}
+	          color="rgba(255, 0, 0, 0.5)"
+	          coordinates={this.state.testroute}
+	        />
           </MapView>
         <View style={styles.middle}>
-        <Text style={styles.input}>测试:{this.state.mode}+{this.state.test}+{this.state.zoom}</Text>
+        <Text style={styles.input}>测试:{this.state.testlog}+{this.state.test}</Text>
         <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
                 <Text style={styles.input} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
                 <Text style={styles.input} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
@@ -319,6 +427,7 @@ componentWillMount()
         <View style={styles.bottom}>
          {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/> */}
          <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Login')} title="登陆测试"/>
+         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={()=>this.Route()} title="路径测试"/>
         </View>
       </View>
               )

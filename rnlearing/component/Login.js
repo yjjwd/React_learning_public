@@ -12,8 +12,8 @@ export default class LoginScreen extends Component{
     }
     componentDidMount(){}
      Login(){
-            const{username,passworld}=this.state
-            if(username===passworld&&username==='admin')
+            const{username,password}=this.state
+            if(username===password&&username==='admin')
             {
                 alert('登陆成功')
                 this.props.navigation.navigate('MainMenu')
@@ -23,14 +23,10 @@ export default class LoginScreen extends Component{
     }
     Test(){
         
-        const data = {
-            'action': 'register',
-            'r_username': 'Admin',
-            'r_password': '666'
-        }
+        const{username,password}=this.state
         // fetch("https://www.kingdom174.work",{method:'GET',body:JSON.stringify(data)})   
         // .then(response => response.json()) // parses response to JSON
-        fetch("https://localhost:8080/register?action=register&r_username=lishiyun2&r_password=678",{method:'GET'})   
+        fetch("https://www.kingdom174.work/register?action=register&r_username="+username+"&r_password="+password,{method:'GET'})   
     }
     render(){
         return(
