@@ -22,6 +22,7 @@ export default class HomeScreen extends React.Component {
         city:'',
         test1:'null',
         test2:'null',
+        test3:'null',
         logs: [],
         NowLocation:'当前位置',
         mode:'null',
@@ -35,8 +36,8 @@ export default class HomeScreen extends React.Component {
         temp:'',
         testroute:[
           {
-            latitude: 23.0430,
-            longitude: 113.3649,
+            latitude: 23.0830,
+            longitude: 113.4749,
           },
           {
             latitude: 25.806901,
@@ -274,15 +275,8 @@ Postdata(e)
  //定义全局object数组
 _routeline = 
 [
-  {
-    latitude: 23.0450,
-    longitude: 113.3639,
-  },
-  {
-    latitude: 23.0450,
-    longitude: 113.3639,
-  },
-  ]
+
+]
 
 // Convert(str)
 // {
@@ -296,7 +290,8 @@ _routeline =
 
 Route()
 {
-  fetch("https://restapi.amap.com/v3/direction/driving?key=4df0ef52b83b532834ffa118afa77de5&origin=116.481028,39.989643&destination=116.434446,39.90816&originid=&destinationid=&extensions=base&strategy=0&waypoints=116.357483,39.907234&avoidpolygons=&avoidroad=")
+  this._routeline=[]
+  fetch("https://restapi.amap.com/v3/direction/driving?key=4df0ef52b83b532834ffa118afa77de5&origin="+this.state.Nowlongitude+","+this.state.Nowlatitude+"&destination="+this.state.Togolongitude+","+this.state.Togolatitude+"&originid=&destinationid=&extensions=base&strategy=0&waypoints=116.357483,39.907234&avoidpolygons=&avoidroad=")
   .then(response=>response.json())
   .then(json=>{
     this.setState({temp:json.route.paths[0].steps[0].polyline})
@@ -304,33 +299,35 @@ Route()
     // this.setState({test:this._routeline})
     const def = String(this.state.temp).split(';') //将原始数据按分号隔开，每组为latitude，longitude
 
-    for(var i=0;i<def.length;i++) //循环
+    for(var i=0;i<def.length;i++) //循环写入值
     {
+      if(!this._routeline[i]) { this._routeline[i]={} }
       const temp = String(def[i]).split(",") //再次分割，0为latitude,1为longitude
-      this._routeline[i].latitude=temp[0]
-      this._routeline[i].longitude=temp[1]
-      this.setState({test:temp[1]})
+      this._routeline[i].latitude=temp[0]*1
+      this._routeline[i].longitude=temp[1]*1
+      this.setState({test3:def.length})//用于确认temp确实读到值了
     }
-    const a=[
-      {
-        latitude: 23.0450,
-        longitude: 113.3639,
-      },
-      {
-        latitude: 25.806901,
-        longitude: 114.257972,
-      },
-      {
-        latitude: 26.806901,
-        longitude: 115.457972,
-      },
-      {
-        latitude: 27.806901,
-        longitude: 114.597972,
-      },
-    ]
+    //测试用数组
+    // const a=[
+    //   {
+    //     latitude: 23.0450,
+    //     longitude: 113.3639,
+    //   },
+    //   {
+    //     latitude: 25.806901,
+    //     longitude: 114.257972,
+    //   },
+    //   {
+    //     latitude: 26.806901,
+    //     longitude: 115.457972,
+    //   },
+    //   {
+    //     latitude: 27.806901,
+    //     longitude: 114.597972,
+    //   },
+    // ]
     // const arry = this._routeline.split(";")
-    this.setState({testroute:a,testlog:this._routeline[1].latitude})//读不出来
+    this.setState({testroute:this._routeline,test1:this._routeline[0].longitude,test2:this._routeline[0].latitude})
  }
     ).catch((error)=>{
      console.log('request failed', error)
@@ -359,24 +356,24 @@ componentWillMount()
         },
 
     }
-    const _routeline1=[
-	    {
-	      latitude: 23.0430,
-	      longitude: 113.3649,
-	    },
-	    {
-	      latitude: 25.806901,
-	      longitude: 114.257972,
-	    },
-	    {
-	      latitude: 26.806901,
-	      longitude: 115.457972,
-	    },
-	    {
-	      latitude: 27.806901,
-	      longitude: 114.597972,
-	    },
-	  ]
+    // const _routeline1=[
+	  //   {
+	  //     latitude: 23.0430,
+	  //     longitude: 113.3649,
+	  //   },
+	  //   {
+	  //     latitude: 25.806901,
+	  //     longitude: 114.257972,
+	  //   },
+	  //   {
+	  //     latitude: 26.806901,
+	  //     longitude: 115.457972,
+	  //   },
+	  //   {
+	  //     latitude: 27.806901,
+	  //     longitude: 114.597972,
+	  //   },
+	  // ]
     const { navigation } = this.props;
     const mode =navigation.getParam('Mode', null);
     const Searchlocation = navigation.getParam('Searchlocation',null)
@@ -417,7 +414,7 @@ componentWillMount()
 	        />
           </MapView>
         <View style={styles.middle}>
-        <Text style={styles.input}>测试:{this.state.testlog}+{this.state.test}</Text>
+        <Text style={styles.input}>测试:{this.state.test1},{this.state.test2}+{this.state.test3}</Text>
         <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
                 <Text style={styles.input} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
                 <Text style={styles.input} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
