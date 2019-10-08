@@ -278,12 +278,13 @@ Route()
   {
     this._routeline=[] 
     var route_length =0
+    //此处使用驾车导航api，还有步行公交骑行等
     fetch("https://restapi.amap.com/v3/direction/driving?key=4df0ef52b83b532834ffa118afa77de5&origin="+this.state.Nowlongitude+","+this.state.Nowlatitude+"&destination="+this.state.Togolongitude+","+this.state.Togolatitude+"&originid=&destinationid=&extensions=base&strategy=0&waypoints=&avoidpolygons=&avoidroad=")
     .then(response=>response.json())
     .then(json=>{
       for(var a=0;a<json.route.paths[0].steps.length;a++)
       {
-        this.setState({temp:json.route.paths[0].steps[a].polyline})
+        this.setState({temp:json.route.paths[0].steps[a].polyline})//此处默认选择推荐路线，可优化
         const def = String(this.state.temp).split(';') //将原始数据按分号隔开，每组为latitude，longitude
         for(var i=0;i<def.length;i++) //循环写入值
         {
@@ -386,12 +387,12 @@ componentWillMount()
           </MapView>
         <View style={styles.middle}>
         <Text style={styles.input}>测试:{this.state.Togolatitude},{this.state.Togolongitude}</Text>
-        <Text style={styles.input}>测试:{this.state.test2},{this.state.test1}+{this.state.test3}</Text>
-        {/* <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
+        {/* <Text style={styles.input}>测试:{this.state.test2},{this.state.test1}+{this.state.test3}</Text> */}
+        <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
                 <Text style={styles.input} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
                 <Text style={styles.input} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
                 <Text style={styles.login} onPress={(event) => {this.Move()} }>Move</Text>
-        </TouchableOpacity> */}
+        </TouchableOpacity>
         </View>
         <View style={styles.bottom}>
          {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/> */}
