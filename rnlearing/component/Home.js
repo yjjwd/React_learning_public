@@ -1,9 +1,10 @@
 import  React,{Component} from 'react'
-import {Text,View,Image,TextInput,StyleSheet,Button ,TouchableOpacity,FlatList} from 'react-native';
+import {Text,View,Image,TextInput,StyleSheet,Button ,TouchableOpacity,FlatList,Alert} from 'react-native';
 import { MapView } from 'react-native-amap3d'
 import PropTypes from "prop-types";
 import NowAndToGo from './NowAndTogo'
 import {NavigationEvents} from 'react-navigation'
+import {MultiPoint} from './Multipoint'
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -13,37 +14,65 @@ export default class HomeScreen extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-        longitude: '',
+        longitude: '', //现在位置逆地理编码中存储的经纬度和转化结果（可优化）
         latitude: '',
-        Nowlongitude: '',
+        city:'',     
+
+        Nowlongitude: '', //现在位置
         Nowlatitude: '',
-        Togolongitude:'',
+        Togolongitude:'', //想要去
         Togolatitude:'',
-        city:'',
-        test1:'null',
+ 
+        test1:'null', //调试用四个变量
         test2:'null',
         test3:'null',
-        logs: [],
-        NowLocation:'当前位置',
-        mode:'null',
-        Togo:'我想去',
-        Searchlocation:'',
-        findpath:false,
-        zoom:18,
-        monted:false,
-        searched:false,
         testlog:[1,2,3,4],
-        temp:'',
-        testroute:[]
+
+
+        NowLocation:'当前位置', //文本框中内容
+        Togo:'我想去',
+
+        mode:'null', //用于传递搜索模式（现在位置/将要去）
+
+        Searchlocation:'', //搜索页面子传父用
+
+        findpath:false, //是否建立导航路线（暂未使用）
+
+        zoom:18, //地图缩放比
+
+        monted:false, //地图是否构建完成，防止重复构建
+        searched:false, //是否由搜索页返回（暂时弃用）
+
+        logs: [],//地图回调信息
+
+        temp:'',//万用
+
+        RouteGuide:[],//导航用路径点 折线数组
+
+        UserPosition:'',//用户位置 海量点数组
+        UsersChange:false, //是否有用户位置更新
+        DriversPosition:[{  //司机位置 海量点数组
+          key:'王老五',
+          latitude: 23.0426 ,
+          longitude:113.3655 ,
+        },
+        {  
+          key:'刘小四',
+          latitude: 23.0436 ,
+          longitude:113.3645 ,
+        }], 
+        DriversChange:false, //是否有司机位置更新
 
     }
 }
 
-getRad(d){
+getRad(d)
+{
   return d*3.1415926/180.0;
 }
-//暂时使用的数学计算方法
- getGreatCircleDistance(lat1,lng1,lat2,lng2){
+//暂时使用的数学计算方法，计算两个坐标的直线距离
+ getGreatCircleDistance(lat1,lng1,lat2,lng2)
+ {
   var radLat1 = this.getRad(lat1)
   var radLat2 = this.getRad(lat2);
   
@@ -57,6 +86,7 @@ getRad(d){
   return s;
 }
 
+//将回调经纬度打包为所需格式
  GetLongitudeAndLatitude = () => {
 
   return new Promise((resolve, reject) => {
@@ -72,7 +102,8 @@ getRad(d){
   })
 }
 
-Getcity(){
+Getcity()//更新当前位置
+{
     this.GetLongitudeAndLatitude()
     .then((posarr)=>{
       const longitude = posarr[0];
@@ -91,7 +122,7 @@ Getcity(){
   })
 }
 
-_GetSearchValue(val) //同页面子传父用函数
+_GetSearchValue(val) //搜索页面子传父用函数
 {
   this.setState({
     Searchlocation:val
@@ -106,6 +137,7 @@ _GetSearchValue(val) //同页面子传父用函数
         this.setState({monted:true})
     }
 }
+
 //标识用函数
 _onMarkerPress = () => Alert.alert('onPress')
 _onInfoWindowPress = () => Alert.alert('onInfoWindowPress')
@@ -125,7 +157,7 @@ _log(event, data) {
   })
 }
 
-
+//地图更新时触发
 _logPressEvent = ({ nativeEvent }) => {
   this._log('onPress', nativeEvent)
   const longitude = nativeEvent.longitude;
@@ -183,7 +215,7 @@ _logStatusChangeCompleteEvent = ({ nativeEvent }) =>
 _renderItem = ({ item }) =>
   <Text style={styles.logText}>{item.time} {item.event}: {item.data}</Text>
 
-  Search()
+  Search()//前往搜索页
   {
     this.props.navigation.navigate('Search');
   }
@@ -197,7 +229,7 @@ _renderItem = ({ item }) =>
       Searchlocation:Searchlocation,
       longitude:arr[0],
       latitude:arr[1],
-      monted:true,
+      monted:true, 
       mode:mode,
       searched:true,
        },()=>{ 
@@ -228,7 +260,8 @@ _renderItem = ({ item }) =>
       }
       this.CheckMap()
   }
-  CheckMap()
+
+  CheckMap()//检查zoom是否合适
     {
       if(this.state.Nowlatitude&&this.state.Togolatitude)
       {
@@ -245,7 +278,7 @@ _renderItem = ({ item }) =>
       }
     }
 
-Postdata(e)
+Postdata(e)//向搜索页面提供数据
 {
   if(e=='Now')
   {
@@ -272,7 +305,7 @@ _routeline =
 //     }
 // }
 
-Route()
+Route()//得到导航路径点
 {
   if(this.state.Nowlatitude&&this.state.Togolatitude)
   {
@@ -315,7 +348,7 @@ Route()
         //   },
         // ]
     }
-      this.setState({testroute:this._routeline,test3:route_length})
+      this.setState({RouteGuide:this._routeline,test3:route_length})
   }
       ).catch((error)=>{
       console.log('request failed', error)
@@ -324,11 +357,55 @@ Route()
   }
 }
 
+RefreshUserPosition(data) //更新用户位置的函数 data 为 object 包涵 latitude longititude 两个
+{
+  this.setState({latitude:data.latitude})
+  this.setState({longitude:data.longitude})
+}
+
+RefreshDriverPosition(data) //更新司机位置的函数 data 为 object 包涵 key latitude longititude 三个
+{
+    //[检查数据是否合法]
+  var arr=this.state.DriversPosition
+  var length= arr.length
+  for(var n=0;n<length;n++)
+  {   
+     if(data.key==(arr[n].key))
+          {
+            alert(arr[n].latitude)
+            arr[n].latitude=data.latitude
+            arr[n].longitude=data.longitude
+            this.setState({DriversPosition:arr})
+            return
+          }
+  }
+  arr[length]={}
+  arr[length]=data
+  this.setState({DriversPosition:arr})
+}
+
+//点击司机对应点时弹出消息
+_DriversonItemPress = point => Alert.alert(this.state.DriversPosition[this.state.DriversPosition.indexOf(point)].key.toString())
+
+
+
+Move()//司机位置更新调试用
+{
+  var data=
+  {  
+    key:'王老五',
+    latitude: 23.0526 ,
+    longitude:113.3755 ,
+  }
+  this.RefreshDriverPosition(data)
+}
 
 componentWillMount()
 {
 
 }
+
+
 
     render() {
       const Pos ={
@@ -346,6 +423,16 @@ componentWillMount()
         },
 
     }
+     	
+	  var _points = Array(1000).fill(0).map(() => ({
+	    latitude: 23.0426 + Math.random(),
+	    longitude:113.3655 + Math.random(),
+    }))
+    
+    if(this.DriversChange==true)
+      this.RefreshDriverPosition()
+
+
     const { navigation } = this.props;
     const mode =navigation.getParam('Mode', null);
     const Searchlocation = navigation.getParam('Searchlocation',null)
@@ -382,7 +469,12 @@ componentWillMount()
             <MapView.Polyline
 	          width={5}
 	          color="rgba(255, 0, 0, 0.5)"
-	          coordinates={this.state.testroute}
+	          coordinates={this.state.RouteGuide}
+	        />
+           <MapView.MultiPoint
+	          image="point"
+	          points={this.state.DriversPosition}
+	          onItemPress={this._DriversonItemPress}
 	        />
           </MapView>
         <View style={styles.middle}>
