@@ -53,12 +53,13 @@ export default class HomeScreen extends React.Component {
         UserPosition:'',//用户位置 海量点数组
         UsersChange:false, //是否有用户位置更新
          //司机位置 海量点数组
-        DriversPosition:[{
-          key:'王老五',
-          latitude: 23.0526 ,
-          longitude:113.3755 ,
-        }
-      ], 
+        DriversPosition:  [
+        //   {  
+        //   key:'王老7',
+        //   latitude: 23.0526 ,
+        //   longitude:113.3955 ,
+        // },
+      ],
         DriversChange:false, //是否有司机位置更新
 
     }
@@ -365,39 +366,57 @@ RefreshDriverPosition(data) //更新司机位置的函数 data 为 object 包涵
 {
     //[检查数据是否合法]
   var arr=[]
-  arr = this.state.DriversPosition
+  arr = this.state.DriversPosition.concat()
   var length= arr.length
   for(var n=0;n<length;n++)
   {   
-     if(data.key==(arr[n].key))
+     if(data.key==arr[n].key)
           {
-            if(Object.isFrozen(arr[n]))
-              alert('已被冻结')
+              arr[n]={}
+              arr[n].key=data.key
               arr[n].latitude=data.latitude
               arr[n].longitude=data.longitude
-              this.setState({DriversPosition:arr})
-            return
+              this.setState({DriversPosition:arr,test3:'ed'})
+              alert(arr[n].latitude)
+              this.forceUpdate();
+              return
           }
   }
-  alert(arr[length])
+  arr[length]={}
+  if(Object.isFrozen(arr[length]))
+   alert('已被冻结')
+  alert('新建,'+length)
+  // this.setState({
+  //   DriversPosition: [
+  //     {
+  //       key: data.key,
+  //       latitude: data.latitude,
+  //       longitude: data.longitude,
+  //     },
+  //     ...this.state.DriversPosition,
+  //   ],
+  // })
+  arr[length].key=data.key
   arr[length].latitude=data.latitude
   arr[length].longitude=data.longitude
-  this.setState({DriversPosition:arr})
+  this.setState({DriversPosition:arr,test3:'new'})
+  this.forceUpdate();
+  alert(arr[n].latitude)
+  alert(this.state.DriversPosition)
 
 }
 
 //点击司机对应点时弹出消息
 _DriversonItemPress = point => Alert.alert(this.state.DriversPosition[this.state.DriversPosition.indexOf(point)].key.toString())
 
-
+_number = 1
 
 Move()//司机位置更新调试用
 {
-  var data=
-  {  
-    key:'王老五',
-    latitude: 23.0726 ,
-    longitude:113.3955 ,
+  var data =   {  
+    key:'老五',
+    latitude: 23.0526+Math.random() ,
+    longitude:113.3955+Math.random() ,
   }
   this.RefreshDriverPosition(data)
 }
@@ -429,6 +448,7 @@ _points = Array(1000).fill(0).map(() => ({
         },
 
     }
+
     
     if(this.DriversChange==true)
       this.RefreshDriverPosition()
@@ -480,12 +500,12 @@ _points = Array(1000).fill(0).map(() => ({
 	        />
           </MapView>
         <View style={styles.middle}>
-        <Text style={styles.input}>测试:{this.state.Togolatitude},{this.state.Togolongitude}</Text>
+        <Text style={styles.input}>测试:{this.state.Togolatitude},{this.state.Togolongitude},{this.state.test3}</Text>
         {/* <Text style={styles.input}>测试:{this.state.test2},{this.state.test1}+{this.state.test3}</Text> */}
         <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
                 <Text style={styles.input} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
                 <Text style={styles.input} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
-                <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.Move()} title="Move"/>
+                <Button style={styles.login} onPress={() => this.Move()} title="Move"/>
         </TouchableOpacity>
         </View>
         <View style={styles.bottom}>
