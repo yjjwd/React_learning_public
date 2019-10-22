@@ -1,6 +1,7 @@
 import  React,{Component} from 'react'
-import {Text,View,Image,TextInput,StyleSheet,Button ,TouchableOpacity,FlatList,Alert} from 'react-native';
+import {Text,View,Image,TextInput,StyleSheet,TouchableOpacity,Button,FlatList,Alert} from 'react-native';
 import { MapView } from 'react-native-amap3d'
+// import Button from 'antd-mobile-rn/lib/button'
 import PropTypes from "prop-types";
 import NowAndToGo from './NowAndTogo'
 import {NavigationEvents} from 'react-navigation'
@@ -51,16 +52,13 @@ export default class HomeScreen extends React.Component {
 
         UserPosition:'',//用户位置 海量点数组
         UsersChange:false, //是否有用户位置更新
-        DriversPosition:[{  //司机位置 海量点数组
+         //司机位置 海量点数组
+        DriversPosition:[{
           key:'王老五',
-          latitude: 23.0426 ,
-          longitude:113.3655 ,
-        },
-        {  
-          key:'刘小四',
-          latitude: 23.0436 ,
-          longitude:113.3645 ,
-        }], 
+          latitude: 23.0526 ,
+          longitude:113.3755 ,
+        }
+      ], 
         DriversChange:false, //是否有司机位置更新
 
     }
@@ -366,22 +364,26 @@ RefreshUserPosition(data) //更新用户位置的函数 data 为 object 包涵 l
 RefreshDriverPosition(data) //更新司机位置的函数 data 为 object 包涵 key latitude longititude 三个
 {
     //[检查数据是否合法]
-  var arr=this.state.DriversPosition
+  var arr=[]
+  arr = this.state.DriversPosition
   var length= arr.length
   for(var n=0;n<length;n++)
   {   
      if(data.key==(arr[n].key))
           {
-            alert(arr[n].latitude)
-            arr[n].latitude=data.latitude
-            arr[n].longitude=data.longitude
-            this.setState({DriversPosition:arr})
+            if(Object.isFrozen(arr[n]))
+              alert('已被冻结')
+              arr[n].latitude=data.latitude
+              arr[n].longitude=data.longitude
+              this.setState({DriversPosition:arr})
             return
           }
   }
-  arr[length]={}
-  arr[length]=data
+  alert(arr[length])
+  arr[length].latitude=data.latitude
+  arr[length].longitude=data.longitude
   this.setState({DriversPosition:arr})
+
 }
 
 //点击司机对应点时弹出消息
@@ -394,8 +396,8 @@ Move()//司机位置更新调试用
   var data=
   {  
     key:'王老五',
-    latitude: 23.0526 ,
-    longitude:113.3755 ,
+    latitude: 23.0726 ,
+    longitude:113.3955 ,
   }
   this.RefreshDriverPosition(data)
 }
@@ -405,7 +407,11 @@ componentWillMount()
 
 }
 
-
+_points = Array(1000).fill(0).map(() => ({
+  key:'王老五',
+  latitude: 22.0526 + Math.random(),
+  longitude: 112.3755 + Math.random(),
+}))
 
     render() {
       const Pos ={
@@ -423,14 +429,10 @@ componentWillMount()
         },
 
     }
-     	
-	  var _points = Array(1000).fill(0).map(() => ({
-	    latitude: 23.0426 + Math.random(),
-	    longitude:113.3655 + Math.random(),
-    }))
     
     if(this.DriversChange==true)
       this.RefreshDriverPosition()
+
 
 
     const { navigation } = this.props;
@@ -483,13 +485,13 @@ componentWillMount()
         <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
                 <Text style={styles.input} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
                 <Text style={styles.input} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
-                <Text style={styles.login} onPress={(event) => {this.Move()} }>Move</Text>
+                <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.Move()} title="Move"/>
         </TouchableOpacity>
         </View>
         <View style={styles.bottom}>
          {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/> */}
-         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Login')} title="登陆测试"/>
-         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={()=>this.Route()} title="路径测试"/>
+         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between', }} onPress={() => this.props.navigation.navigate('Login')} title="登陆测试"/>
+         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between',}} onPress={()=>this.Route()} title="路径测试"/>
         </View>
       </View>
               )
@@ -527,8 +529,7 @@ const styles=StyleSheet.create(
         },
         input: {
           fontSize: 20,
-          width: 500,
-          margin: 10,
+          marginTop:20,
           borderBottomWidth: 1,
           borderStyle: 'solid',
           borderColor: '#841584',

@@ -2,6 +2,7 @@
 	import { StyleSheet, Alert } from 'react-native'
 	import { MapView } from 'react-native-amap3d'
 	
+	
 	export default class MultiPointExample extends Component {
 	  static navigationOptions = {
 	    title: '海量点',
