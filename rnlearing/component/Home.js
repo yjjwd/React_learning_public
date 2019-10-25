@@ -6,6 +6,7 @@ import PropTypes from "prop-types";
 import NowAndToGo from './NowAndTogo'
 import {NavigationEvents} from 'react-navigation'
 import {MultiPoint} from './Multipoint'
+import {DriversPos} from './DriversPos.js'
 
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
@@ -23,6 +24,8 @@ export default class HomeScreen extends React.Component {
         Nowlatitude: '',
         Togolongitude:'', //想要去
         Togolatitude:'',
+        Driverlatitude:'23.0526',
+        Driverlongitude:'113.3955',
  
         test1:'null', //调试用四个变量
         test2:'null',
@@ -356,53 +359,80 @@ Route()//得到导航路径点
   }
 }
 
+//司机路径模拟
+DriverRoute()
+{
+  if(this.state.Nowlatitude&&this.state.Driverlongitude)
+  {
+    this._routeline=[] 
+    var route_length =0
+    //此处使用驾车导航api，还有步行公交骑行等
+    fetch("https://restapi.amap.com/v3/direction/driving?key=4df0ef52b83b532834ffa118afa77de5&origin="+this.state.Driverlongitude+","+this.state.Driverlatitude+"&destination="+this.state.Nowlongitude+","+this.state.Nowlatitude+"&originid=&destinationid=&extensions=base&strategy=0&waypoints=&avoidpolygons=&avoidroad=")
+    .then(response=>response.json())
+    .then(json=>{
+      for(var a=0;a<json.route.paths[0].steps.length;a++)
+      {
+        this.setState({temp:json.route.paths[0].steps[a].polyline})//此处默认选择推荐路线，可优化
+        const def = String(this.state.temp).split(';') //将原始数据按分号隔开，每组为latitude，longitude
+        for(var i=0;i<def.length;i++) //循环写入值
+        {
+          if(!this._routeline[route_length]) { this._routeline[route_length]={} }
+          const temp = String(def[i]).split(",") //再次分割，0为latitude,1为longitude
+          this._routeline[route_length].latitude=temp[1]*1
+          this._routeline[route_length].longitude=temp[0]*1
+          route_length++
+          this.setState({test3:def.length})//用于确认temp确实读到值了
+        }
+    }
+      this.setState({RouteGuide:this._routeline,test3:route_length})
+  }
+      ).catch((error)=>{
+      console.log('request failed', error)
+  })
+  this.state.RouteGuide.reverse()
+  // while(this.state.RouteGuide.length != 1)
+  // setTimeout(() => {
+  //   this.setState({Driverlatitude:this.state.RouteGuide[this.state.RouteGuide.length-1].latitude,Driverlongtitude:this.state.RouteGuide[this.state.RouteGuide.length-1].longtititude},()=>this.setState({RouteGuide:this.state.RouteGuide.pop()}))
+  // }, 5);
+  // }
+  }
+}
+
 RefreshUserPosition(data) //更新用户位置的函数 data 为 object 包涵 latitude longititude 两个
 {
   this.setState({latitude:data.latitude})
   this.setState({longitude:data.longitude})
 }
 
+_DriverPoint=[] 
+
 RefreshDriverPosition(data) //更新司机位置的函数 data 为 object 包涵 key latitude longititude 三个
 {
     //[检查数据是否合法]
-  var arr=[]
-  arr = this.state.DriversPosition.concat()
-  var length= arr.length
+  this._DriverPoint=[]
+  this._DriverPoint = this.state.DriversPosition.concat()
+  var length= this._DriverPoint.length
   for(var n=0;n<length;n++)
   {   
-     if(data.key==arr[n].key)
+     if(data.key==this._DriverPoint[n].key)
           {
-              arr[n]={}
-              arr[n].key=data.key
-              arr[n].latitude=data.latitude
-              arr[n].longitude=data.longitude
-              this.setState({DriversPosition:arr,test3:'ed'})
-              alert(arr[n].latitude)
-              this.forceUpdate();
+              this._DriverPoint[n]={}
+              this._DriverPoint[n].key=data.key
+              this._DriverPoint[n].latitude=data.latitude
+              this._DriverPoint[n].longitude=data.longitude
+              this.setState({DriversPosition:this._DriverPoint,test3:'ed'})
+              alert(this._DriverPoint[n].latitude)
               return
           }
   }
-  arr[length]={}
-  if(Object.isFrozen(arr[length]))
+  this._DriverPoint[length]={}
+  if(Object.isFrozen(this._DriverPoint[length]))
    alert('已被冻结')
   alert('新建,'+length)
-  // this.setState({
-  //   DriversPosition: [
-  //     {
-  //       key: data.key,
-  //       latitude: data.latitude,
-  //       longitude: data.longitude,
-  //     },
-  //     ...this.state.DriversPosition,
-  //   ],
-  // })
-  arr[length].key=data.key
-  arr[length].latitude=data.latitude
-  arr[length].longitude=data.longitude
-  this.setState({DriversPosition:arr,test3:'new'})
-  this.forceUpdate();
-  alert(arr[n].latitude)
-  alert(this.state.DriversPosition)
+  this._DriverPoint[length].key=data.key
+  this._DriverPoint[length].latitude=data.latitude
+  this._DriverPoint[length].longitude=data.longitude
+  this.setState({DriversPosition:this._DriverPoint,test3:'new'})
 
 }
 
@@ -414,7 +444,7 @@ _number = 1
 Move()//司机位置更新调试用
 {
   var data =   {  
-    key:'老五',
+    key:Math.random(),
     latitude: 23.0526+Math.random() ,
     longitude:113.3955+Math.random() ,
   }
@@ -446,6 +476,10 @@ _points = Array(1000).fill(0).map(() => ({
           latitude: this.state.Togolatitude*1,
           longitude: this.state.Togolongitude*1
         },
+        DriverPos:{
+          latitude: this.state.Driverlatitude*1,
+          longitude: this.state.Driverlongitude*1
+        }
 
     }
 
@@ -488,11 +522,19 @@ _points = Array(1000).fill(0).map(() => ({
                 <Text>我的位置</Text>
               </View>
             </MapView.Marker>
+            <MapView.Marker image="flag" coordinate={Pos.DriverPos}>
+              <View style={styles.defaultbox}>
+                <Text>司机位置</Text>
+              </View>
+            </MapView.Marker>
             <MapView.Polyline
 	          width={5}
 	          color="rgba(255, 0, 0, 0.5)"
 	          coordinates={this.state.RouteGuide}
 	        />
+          {/* {this.state.DriversPosition.map((item)=>{
+            return <DriversPos coords={item}/>
+          })} */}
            <MapView.MultiPoint
 	          image="point"
 	          points={this.state.DriversPosition}
@@ -511,7 +553,7 @@ _points = Array(1000).fill(0).map(() => ({
         <View style={styles.bottom}>
          {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/> */}
          <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between', }} onPress={() => this.props.navigation.navigate('Login')} title="登陆测试"/>
-         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between',}} onPress={()=>this.Route()} title="路径测试"/>
+         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between',}} onPress={()=>this.DriverRoute()} title="路径测试"/>
         </View>
       </View>
               )

@@ -20,7 +20,7 @@ render(){
                         <View style={styles.defaultbox}>
                             <Text>{item.key}</Text>
                         </View>
-                 </MapView.Marker>
+                 </MapView.Marker> 
               )
             })
       )
