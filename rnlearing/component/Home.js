@@ -265,19 +265,19 @@ _renderItem = ({ item }) =>
 
   CheckMap()//检查zoom是否合适
     {
-      if(this.state.Nowlatitude&&this.state.Togolatitude)
-      {
-        this.setState({findpath:true})
-        var distance=this.getGreatCircleDistance(this.state.Nowlatitude,this.state.Nowlongitude,this.state.Togolatitude,this.state.Togolongitude)
-        this.setState({test:distance,zoom:3})
-        if(distance<=500) {this.setState({zoom:18})}
-        else if(distance<=1000) {this.setState({zoom:15})}
-        else if(distance<=10000) {this.setState({zoom:10})}
-        else if(distance<=100000) {this.setState({zoom:8})}
-        else if(distance<=1000000) {this.setState({zoom:7})}
-        else if(distance<=1000000) {this.setState({zoom:4})}
-        else this.setState({zoom:4})
-      }
+      // if(this.state.Nowlatitude&&this.state.Togolatitude)
+      // {
+      //   this.setState({findpath:true})
+      //   var distance=this.getGreatCircleDistance(this.state.Nowlatitude,this.state.Nowlongitude,this.state.Togolatitude,this.state.Togolongitude)
+      //   this.setState({test:distance,zoom:3})
+      //   if(distance<=500) {this.setState({zoom:18})}
+      //   else if(distance<=1000) {this.setState({zoom:15})}
+      //   else if(distance<=10000) {this.setState({zoom:10})}
+      //   else if(distance<=100000) {this.setState({zoom:8})}
+      //   else if(distance<=1000000) {this.setState({zoom:7})}
+      //   else if(distance<=1000000) {this.setState({zoom:4})}
+      //   else this.setState({zoom:4})
+      // }
     }
 
 Postdata(e)//向搜索页面提供数据
@@ -290,6 +290,23 @@ Postdata(e)//向搜索页面提供数据
   {
     this.props.navigation.navigate('Search',{Mode:'To',Data:this.state.Togo,callback:(mode,Searchlocation)=>{this.SearchCallBack(mode,Searchlocation)}})
   }
+}
+
+OrderPost()
+{
+  const{username,Nowlatitude,Nowlongitude,Togolatitude,Togolongitude,RouteGuide}=this.state
+  var data ={
+    DriverID:6054,
+    PassengerID:1569,
+    Fare:15,
+    StartPlace:{Nowlatitude,Nowlongitude},
+    destination:{Togolatitude,Togolongitude},
+    Route:RouteGuide,
+  }
+  fetch("https://www.kingdom174.work/register",{method:'POST',body:JSON.stringify(data)}) 
+  .then(res => res.json())
+  .catch(error => console.error('Error:', error))
+  .then(response => console.log('Success:', response));  
 }
  //定义全局object数组
 _routeline = 
@@ -547,13 +564,13 @@ _points = Array(1000).fill(0).map(() => ({
         <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
                 <Text style={styles.input} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
                 <Text style={styles.input} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
-                <Button style={styles.login} onPress={() => this.Move()} title="Move"/>
+                <Button style={styles.login} onPress={() => this.DriverRoute()} title="Move"/>
         </TouchableOpacity>
         </View>
         <View style={styles.bottom}>
          {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/> */}
-         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between', }} onPress={() => this.props.navigation.navigate('Login')} title="登陆测试"/>
-         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between',}} onPress={()=>this.DriverRoute()} title="路径测试"/>
+         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between',color:'red' }} onPress={() => this.props.navigation.navigate('Login')} title="登陆测试"/>
+         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between',}} onPress={()=>this.Route()} title="路径测试"/>
         </View>
       </View>
               )

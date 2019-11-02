@@ -1,5 +1,5 @@
 import  React,{Component} from 'react'
-import {Text,View,TextInput,StyleSheet,Botton } from 'react-native';
+import {Text,View,TextInput,StyleSheet,FlatList,Botton } from 'react-native';
 import { createStackNavigator, createAppContainer } from 'react-navigation'
 
 export default class LoginScreen extends Component{
@@ -7,11 +7,13 @@ export default class LoginScreen extends Component{
         super(props)
         this.state={
             username:'',
-            password:''
+            password:'',
+            token:'',
+            logs:[],
         }
     }
     componentDidMount(){}
-     Login(){
+     LocalLogin(){
             const{username,password}=this.state
             if(username===password&&username==='admin')
             {
@@ -21,13 +23,50 @@ export default class LoginScreen extends Component{
                 alert('账号或密码错误')
             }
     }
-    Test(){
+    Register(){
         
         const{username,password}=this.state
         // fetch("https://www.kingdom174.work",{method:'GET',body:JSON.stringify(data)})   
         // .then(response => response.json()) // parses response to JSON
-        fetch("https://www.kingdom174.work/register?action=register&r_username="+username+"&r_password="+password,{method:'GET'})   
+        fetch("https://www.kingdom174.work/register?sex=register&r_username="+username+"&r_password="+password,{method:'GET'})   
     }
+    Login(){
+        
+        const{username,password}=this.state
+        // fetch("https://www.kingdom174.work",{method:'GET',body:JSON.stringify(data)})   
+        // .then(response => response.json()) // parses response to JSON
+        fetch("https://www.kingdom174.work/Login?username="+username+"&password="+password+"&location=",{method:'GET'})   
+        .then(response=>response.text())
+        .then(string=>{
+            this.setState({token:string})
+            alert(string)
+        })
+    }
+
+    UserMessage()
+    {
+        const{token}=this.state
+        fetch("https://www.kingdom174.work/Per_Information?token="+token)
+        .then(res=>res.json())
+        .then(json=>{
+            this.setState({
+                logs: [
+                  {
+                    UserName: json.UserName,
+                    Sex:json.Sex,
+                    Status:json.Status,
+                    PhoneNumber:json.PhoneNumber,
+                  },
+                  ...this.state.logs,
+                ],
+              })
+        })
+    }
+
+
+    _renderItem = ({ item }) =>
+  <Text style={styles.logText}>{item. UserName} {item. Sex}: {item.Status}</Text>
+
     render(){
         return(
             <View style ={styles.container}>
@@ -40,8 +79,16 @@ export default class LoginScreen extends Component{
                 onChangeText={(password)=>this.setState({password})}
                 value={this.state.password}
                 placeholder={'请输入密码(admin)'}/>
-                <Text style={styles.login} onPress={()=>{this.Test()}}>Login</Text>
+                 <TextInput style={styles.input} 
+                onChangeText={(token)=>this.setState({token})}
+                value={this.state.token}
+                placeholder={'token'}/>
+                <Text style={styles.login} onPress={()=>{this.Login()}}>Login</Text>
+                <Text style={styles.login} onPress={()=>{this.Register()}}>Register</Text>
+                <Text style={styles.login} onPress={()=>{this.UserMessage()}}>Message</Text>
                 <Text style={styles.login} onPress={() => this.props.navigation.navigate('Home')}>ToHome</Text>
+                <FlatList style={styles.logs} data={this.state.logs} renderItem={this._renderItem}
+	        />
             </View>
         );
     }
@@ -74,13 +121,24 @@ const styles=StyleSheet.create(
             fontSize:24,
             fontWeight:'bold',
             color: 'white',
-            margin: 20,
+            margin: 10,
             backgroundColor: 'orange',
             width: 150,
             height: 50,
             lineHeight: 50,
             textAlign: 'center',
    
-        }
+        },
+        logs: {
+            elevation: 8,
+            flex: 1,
+            backgroundColor: '#fff',
+          },
+          logText: {
+            paddingLeft: 15,
+            paddingRight: 15,
+            paddingTop: 10,
+            paddingBottom: 10,
+          },
     }
 );
