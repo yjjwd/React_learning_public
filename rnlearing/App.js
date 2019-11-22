@@ -13,6 +13,7 @@ import {createStackNavigator, createAppContainer,createNavigationContainer} from
 
 import HomeScreen from './component/Home'
 import LoginScreen from './component/Login'
+import LoginView from './component/NewLogin'
 import Search from './component/Search'
 
 import {TabAppNavigator}  from './component/TabNavigation'

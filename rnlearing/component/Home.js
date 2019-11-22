@@ -8,6 +8,10 @@ import {NavigationEvents} from 'react-navigation'
 import {MultiPoint} from './Multipoint'
 import {DriversPos} from './DriversPos.js'
 
+var Dimensions = require('Dimensions');
+var {width,height} = Dimensions.get('window');
+var screenWidth = width;
+
 export default class HomeScreen extends React.Component {
   static navigationOptions = {
     title: 'Home',
@@ -26,6 +30,8 @@ export default class HomeScreen extends React.Component {
         Togolatitude:'',
         Driverlatitude:'23.0526',
         Driverlongitude:'113.3955',
+
+        
  
         test1:'null', //调试用四个变量
         test2:'null',
@@ -204,7 +210,7 @@ _logStatusChangeCompleteEvent = ({ nativeEvent }) =>
  .then(json=>{
    this.setState({
            city:json.regeocode.formatted_address,
-           NowLocation:json.regeocode.formatted_address
+           NowLocation:json.regeocode.formatted_address,
          })  
    }).catch((error)=>{
     console.log('request failed', error)
@@ -398,6 +404,7 @@ DriverRoute()
           this._routeline[route_length].latitude=temp[1]*1
           this._routeline[route_length].longitude=temp[0]*1
           route_length++
+          convert-webside
           this.setState({test3:def.length})//用于确认temp确实读到值了
         }
     }
@@ -417,13 +424,22 @@ DriverRoute()
 
 RefreshUserPosition(data) //更新用户位置的函数 data 为 object 包涵 latitude longititude 两个
 {
-  this.setState({latitude:data.latitude})
-  this.setState({longitude:data.longitude})
+  this.setState({latitude:data.latitude,longitude:data.longitude})
 }
 
 _DriverPoint=[] 
 
-RefreshDriverPosition(data) //更新司机位置的函数 data 为 object 包涵 key latitude longititude 三个
+RefreshDriverPosition=(data,{nativeEvent})=>
+{
+    const longitude = data.longitude;
+    const latitude  = data.latitude;
+    this.setState({
+      Driverlongitude:longitude,
+      Driverlatitude:latitude,
+     })
+}
+
+RefreshDriverPosition2(data) //更新司机位置的函数 data 为 object 包涵 key latitude longititude 三个
 {
     //[检查数据是否合法]
   this._DriverPoint=[]
@@ -444,11 +460,12 @@ RefreshDriverPosition(data) //更新司机位置的函数 data 为 object 包涵
   }
   this._DriverPoint[length]={}
   if(Object.isFrozen(this._DriverPoint[length]))
-   alert('已被冻结')
+   alert('已被冻结') 
   alert('新建,'+length)
   this._DriverPoint[length].key=data.key
   this._DriverPoint[length].latitude=data.latitude
   this._DriverPoint[length].longitude=data.longitude
+  this.Russiar[length]
   this.setState({DriversPosition:this._DriverPoint,test3:'new'})
 
 }
@@ -461,9 +478,9 @@ _number = 1
 Move()//司机位置更新调试用
 {
   var data =   {  
-    key:Math.random(),
-    latitude: 23.0526+Math.random() ,
-    longitude:113.3955+Math.random() ,
+    key:'first',
+    latitude: 23.0536 ,
+    longitude:113.3855 ,
   }
   this.RefreshDriverPosition(data)
 }
@@ -559,12 +576,12 @@ _points = Array(1000).fill(0).map(() => ({
 	        />
           </MapView>
         <View style={styles.middle}>
-        <Text style={styles.input}>测试:{this.state.Togolatitude},{this.state.Togolongitude},{this.state.test3}</Text>
+        <Text style={styles.textInputStyle}>测试:{this.state.Togolatitude},{this.state.Togolongitude},{this.state.test3}</Text>
         {/* <Text style={styles.input}>测试:{this.state.test2},{this.state.test1}+{this.state.test3}</Text> */}
         <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
-                <Text style={styles.input} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
-                <Text style={styles.input} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
-                <Button style={styles.login} onPress={() => this.DriverRoute()} title="Move"/>
+                <Text style={styles.textInputStyle} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
+                <Text style={styles.textInputStyle} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
+                <Button style={styles.login} onPress={() => this.Move()} title="Move"/>
         </TouchableOpacity>
         </View>
         <View style={styles.bottom}>
@@ -625,6 +642,13 @@ const styles=StyleSheet.create(
             lineHeight: 50,
             textAlign: 'center',
         },
+        textInputStyle:{
+          height:38,
+          width:screenWidth,
+          backgroundColor:'white',
+          marginBottom:1,
+          textAlign:'center'
+      },
         defaultbox:{
           width:90,
           backgroundColor:"pink",
