@@ -9,7 +9,7 @@
 import React, {Component} from 'react';
 import {Platform, StyleSheet, Text, View} from 'react-native';
 
-import {createStackNavigator, createAppContainer,createNavigationContainer} from 'react-navigation'
+import {createStackNavigator, createAppContainer,DrawerNavigator,createDrawerNavigator} from 'react-navigation'
 
 import HomeScreen from './component/Home'
 import LoginScreen from './component/Login'
@@ -25,7 +25,7 @@ const HomeNavigator =createStackNavigator(
   }
 )
 
-const AppNavigator = createStackNavigator({
+const AppNavigator = createDrawerNavigator({
   Home: {
     screen:HomeNavigator,
     navigationOptions: ({navigation}) => ({header: null})
