@@ -42,7 +42,14 @@ const AppNavigator = createDrawerNavigator({
   // }
 }, {
   initialRouteName: 'Home',
-  headerMode: 'screen'
+  headerMode: 'screen'  ,
+  hideStatusBar: true,
+  drawerBackgroundColor: 'rgba(255,255,255,.9)',
+  overlayColor: '#6b52ae',
+  contentOptions: {
+  activeTintColor: '#fff',
+  activeBackgroundColor: '#6b52ae',
+  },
 })
 
 const AppContainer = createAppContainer(AppNavigator);
