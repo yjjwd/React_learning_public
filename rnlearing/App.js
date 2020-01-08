@@ -15,6 +15,8 @@ import HomeScreen from './component/Home'
 import LoginScreen from './component/Login'
 import LoginView from './component/NewLogin'
 import Search from './component/Search'
+import MessageScreen from './component/Message'
+import OrderFormScreen from './component/OrderForm'
 
 import {TabAppNavigator}  from './component/TabNavigation'
 
@@ -37,6 +39,12 @@ const AppNavigator = createDrawerNavigator({
   Main: {
     screen: TabAppNavigator,
   },
+  OrderFrom:{
+    screen:OrderFormScreen,
+  },
+  Message: {
+    screen:MessageScreen,
+  }
   // Search:{
   //   screen:Search
   // }
@@ -44,11 +52,15 @@ const AppNavigator = createDrawerNavigator({
   initialRouteName: 'Home',
   headerMode: 'screen'  ,
   hideStatusBar: true,
+  drawerWidth:200,
   drawerBackgroundColor: 'rgba(255,255,255,.9)',
-  overlayColor: '#6b52ae',
+  drawerType:'front',
+  hideStatusBar:false,
+  overlayColor: 'rgba(135, 206, 250,.4)',
   contentOptions: {
   activeTintColor: '#fff',
-  activeBackgroundColor: '#6b52ae',
+  activeBackgroundColor: '#87CEFA',
+
   },
 })
 

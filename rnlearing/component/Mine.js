@@ -1,7 +1,7 @@
 import  React,{Component} from 'react'
 import {Text,View,TextInput,StyleSheet,Button,TouchableOpacity } from 'react-native';
 
-import CourseItem from './CourseItem'
+import CourseItem from './module/CourseItem'
 export default class MineScreen extends React.Component {
   static navigationOptions = {
     title: '我的课程',

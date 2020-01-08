@@ -1,7 +1,7 @@
 import  React,{Component} from 'react'
 import {Text,ScrollView,View,Image,TextInput,StyleSheet,Button ,FlatList,TouchableOpacity} from 'react-native';
 import { MapView } from 'react-native-amap3d'
-import Mylist from './Mylist'
+import Mylist from './module/Mylist'
 
 
 
@@ -27,7 +27,7 @@ export default class Search extends React.Component {
           this.setState({
                  datastr:JSON.stringify(json),
                  data:json.tips,
-                 load:true
+                 load:true,
                 })           
         }
       )
@@ -77,7 +77,7 @@ export default class Search extends React.Component {
         return(
             <ScrollView style={styles.container}>
                <TextInput style={styles.input} onChangeText={(search) => { this.setState({search:search},this.GetData(this.state.search))  }} value={this.state.search} placeholder={'请输入搜索内容'}></TextInput>
-               <Text>调试用:{this.state.Mode}</Text>
+               <Text>调试用:{this.state.load}</Text>
             {
               this.state.data.map((item) => {
                 return (
@@ -89,7 +89,6 @@ export default class Search extends React.Component {
             }
           </ScrollView>
         )
-
       }else return this.renderLoadingView() 
     }
 };

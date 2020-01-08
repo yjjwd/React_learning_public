@@ -1,7 +1,7 @@
 import  React,{Component} from 'react'
 import {Text,Image,View,TextInput,StyleSheet,FlatList,Botton,TouchableOpacity } from 'react-native';
 import { createStackNavigator, createAppContainer } from 'react-navigation'
-
+import {Back} from './module/Back'
 //屏幕宽度
 var Dimensions = require('Dimensions');
 var {width,height} = Dimensions.get('window');
@@ -44,9 +44,9 @@ export default class LoginScreen extends Component{
         // fetch("https://www.kingdom174.work",{method:'GET',body:JSON.stringify(data)})   
         // .then(response => response.json()) // parses response to JSON
         fetch("https://www.kingdom174.work/Login?username="+username+"&password="+password+"&location=",{method:'GET'})   
-        .then(response=>response.text())
-        .then(string=>{
-            this.setState({token:string})
+        .then(response=>response.json())
+        .then(json=>{
+            this.setState({token:json.token})
             alert(string)
         })
     }
@@ -60,7 +60,7 @@ export default class LoginScreen extends Component{
             this.setState({
                 logs: [
                   {
-                    UserName: json.UserName,
+                    UserID: json.UserID,
                     Sex:json.Sex,
                     Status:json.Status,
                     PhoneNumber:json.PhoneNumber,
@@ -71,13 +71,17 @@ export default class LoginScreen extends Component{
         })
     }
 
-
+    _Back=()=>this.props.navigation.goBack()
     _renderItem = ({ item }) =>
-  <Text style={styles.logText}>{item. UserName} {item. Sex}  {item.Status}</Text>
+  <Text style={styles.logText}>{item. UserID} {item. Sex}  {item.Status}</Text>
 
     render(){
         return(
-            <View style ={styles.container}>
+            <View style ={[styles.container]}>
+            {/* <Back/> */}
+              <TouchableOpacity style={styles.back} activeOpacity={0.2} onPress={this._Back}>
+                <Image style={styles.backimg} source={require('../images/back_img.png')}></Image>
+              </TouchableOpacity>
                  {/*头像*/}
                  <Image source={require('../images/head_icon.png')} style={styles.iconStyle} ></Image>
                 <TextInput style={styles.textInputStyle} 
@@ -179,7 +183,21 @@ const styles = StyleSheet.create({
          height:50,
          borderRadius:25,
          marginLeft:10,
-     }
+     },
+     back:{
+        // flexDirection: 'row',
+        // backgroundColor: 'white',
+        width: 20,
+        height: 20,
+        position:'absolute',
+        left:10,
+        top:20,
+      },
+      backimg:{
+        width:30,
+        height:30,
+      }
+     
  });
  
  

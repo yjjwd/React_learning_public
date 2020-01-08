@@ -1,5 +1,5 @@
 import  React,{Component} from 'react'
-import {Text,View,Image,TextInput,StyleSheet,TouchableOpacity,Button,FlatList,Alert} from 'react-native';
+import {Text,View,Image,TextInput,StyleSheet,TouchableOpacity,Button,FlatList,Alert, NativeMethodsMixin} from 'react-native';
 import { MapView } from 'react-native-amap3d'
 // import Button from 'antd-mobile-rn/lib/button'
 import PropTypes from "prop-types";
@@ -13,9 +13,7 @@ var {width,height} = Dimensions.get('window');
 var screenWidth = width;
 
 export default class HomeScreen extends React.Component {
-  static navigationOptions = {
-    title: 'Home',
-  };
+
   _watchID;
   constructor(props) {
     super(props);
@@ -31,7 +29,6 @@ export default class HomeScreen extends React.Component {
         Driverlatitude:'23.0526',
         Driverlongitude:'113.3955',
 
-        
  
         test1:'null', //调试用四个变量
         test2:'null',
@@ -70,7 +67,7 @@ export default class HomeScreen extends React.Component {
         // },
       ],
         DriversChange:false, //是否有司机位置更新
-
+      box:0
     }
 }
 
@@ -78,7 +75,7 @@ getRad(d)
 {
   return d*3.1415926/180.0;
 }
-//暂时使用的数学计算方法，计算两个坐标的直线距离
+//使用的数学计算方法，计算两个坐标的直线距离
  getGreatCircleDistance(lat1,lng1,lat2,lng2)
  {
   var radLat1 = this.getRad(lat1)
@@ -191,7 +188,7 @@ this.CheckMap()
 
 _logLongPressEvent = ({ nativeEvent }) => this._log('onLongPress', nativeEvent)
 _logLocationEvent = ({ nativeEvent }) => this._log('onLocation', nativeEvent)
-_logStatusChangeCompleteEvent = ({ nativeEvent }) =>
+_logStatusChangeCompleteEvent = ({nativeEvent}) =>
  {
    this._log('onStatusChangeComplete', nativeEvent)
   }
@@ -276,13 +273,13 @@ _renderItem = ({ item }) =>
       //   this.setState({findpath:true})
       //   var distance=this.getGreatCircleDistance(this.state.Nowlatitude,this.state.Nowlongitude,this.state.Togolatitude,this.state.Togolongitude)
       //   this.setState({test:distance,zoom:3})
-      //   if(distance<=500) {this.setState({zoom:18})}
-      //   else if(distance<=1000) {this.setState({zoom:15})}
-      //   else if(distance<=10000) {this.setState({zoom:10})}
-      //   else if(distance<=100000) {this.setState({zoom:8})}
-      //   else if(distance<=1000000) {this.setState({zoom:7})}
-      //   else if(distance<=1000000) {this.setState({zoom:4})}
-      //   else this.setState({zoom:4})
+      //   if(distance<=500) { this.mapView.animateTo({zoomLevel:18})}
+      //   else if(distance<=1000) {this.mapView.animateTo({zoomLevel:15})}
+      //   else if(distance<=10000) {this.mapView.animateTo({zoomLevel:10})}
+      //   else if(distance<=100000) {this.mapView.animateTo({zoomLevel:8})}
+      //   else if(distance<=1000000) {this.mapView.animateTo({zoomLevel:7})}
+      //   else if(distance<=1000000) {this.mapView.animateTo({zoomLevel:4})}
+      //   else this.mapView.animateTo({zoomLevel:4})
       // }
     }
 
@@ -414,11 +411,6 @@ DriverRoute()
       console.log('request failed', error)
   })
   this.state.RouteGuide.reverse()
-  // while(this.state.RouteGuide.length != 1)
-  // setTimeout(() => {
-  //   this.setState({Driverlatitude:this.state.RouteGuide[this.state.RouteGuide.length-1].latitude,Driverlongtitude:this.state.RouteGuide[this.state.RouteGuide.length-1].longtititude},()=>this.setState({RouteGuide:this.state.RouteGuide.pop()}))
-  // }, 5);
-  // }
   }
 }
 
@@ -429,7 +421,7 @@ RefreshUserPosition(data) //更新用户位置的函数 data 为 object 包涵 l
 
 _DriverPoint=[] 
 
-RefreshDriverPosition=(data,{nativeEvent})=>
+RefreshDriverPosition=(data)=>     //更新司机位置的函数 data 为 object 包涵 key latitude longititude 三个（单个司机版本）
 {
     const longitude = data.longitude;
     const latitude  = data.latitude;
@@ -439,7 +431,7 @@ RefreshDriverPosition=(data,{nativeEvent})=>
      })
 }
 
-RefreshDriverPosition2(data) //更新司机位置的函数 data 为 object 包涵 key latitude longititude 三个
+RefreshDriverPosition2(data) //更新司机位置的函数 data 为 object 包涵 key latitude longititude 三个 (多个司机版本)
 {
     //[检查数据是否合法]
   this._DriverPoint=[]
@@ -459,8 +451,8 @@ RefreshDriverPosition2(data) //更新司机位置的函数 data 为 object 包�
           }
   }
   this._DriverPoint[length]={}
-  if(Object.isFrozen(this._DriverPoint[length]))
-   alert('已被冻结') 
+  // if(Object.isFrozen(this._DriverPoint[length]))
+  //  alert('已被冻结') 
   alert('新建,'+length)
   this._DriverPoint[length].key=data.key
   this._DriverPoint[length].latitude=data.latitude
@@ -475,15 +467,97 @@ _DriversonItemPress = point => Alert.alert(this.state.DriversPosition[this.state
 
 _number = 1
 
+PointAnimatedTo(Point,Route)  //点的移动函数
+{
+  var route =Route
+  var temp ={latitude:0,longtitude:0}
+  var n =0
+  var dis = route[0]
+  if(Point=="driver")
+  {
+    var length = route.length
+    var interval = setInterval(()=>{
+      let coord = route[n++]
+      let distance = this.getGreatCircleDistance(dis.latitude,dis.longitude,coord.latitude,coord.longitude)
+      while(distance>30) //处理直到两个点距离小于30m
+      {
+        temp=dis
+        temp.latitude=(dis.latitude+coord.latitude)/2
+        temp.longtitude=(dis.latitude+coord.latitude)/2
+        distance=this.getGreatCircleDistance(coord.latitude,coord.longitude,temp.latitude,temp.longitude)
+        while(distance>30)
+        {
+          temp.latitude=(temp.latitude+coord.latitude)/2
+          coord.longtitude=(temp.latitude+coord.latitude)/2
+          distance=this.getGreatCircleDistance(coord.latitude,coord.longitude,temp.latitude,temp.longitude)
+        }
+        if(distance<=30)
+        {
+          this.RefreshDriverPosition(temp)
+          this.mapView.animateTo({
+            coordinate: temp,
+          })
+          coord=temp
+          distance=getGreatCircleDistance(coord.latitude,coord.longitude,dis.latitude,dis.longitude)
+        }
+      }
+      this.RefreshDriverPosition(coord)
+      this.mapView.animateTo({
+        coordinate: coord,
+      })
+      dis = route[n]
+      if(n==length){    
+          clearInterval(interval);   
+      }
+  }, 1000);
+  }
+}
+
 Move()//司机位置更新调试用
 {
-  var data =   {  
-    key:'first',
-    latitude: 23.0536 ,
-    longitude:113.3855 ,
+  let length =this.state.box
+  if(length != this.state.RouteGuide.length)
+  {
+    let route = this.state.RouteGuide
+    let coord = route[length]
+    // alert(coord)
+    this.RefreshDriverPosition(coord)
+    this.mapView.animateTo({
+      coordinate: coord,
+    })
+    this.setState({box:this.state.box+1})
+    return 1
+  } else{
+    alert("完成")
+    return 0
   }
-  this.RefreshDriverPosition(data)
 }
+
+// CMove()
+// {
+//   var flag =1
+//   var interval = setInterval(()=>{
+//     flag=this.Move();
+//     if(flag==0){    
+//         clearInterval(interval);   
+//     }
+// }, 1000);
+//   }
+
+_OpenDrawer=()=>this.props.navigation.openDrawer()
+
+// _animatedToZGC = () => {
+//   var data={
+//     latitude: this.state.Driverlatitude*1+0.001 ,
+//     longitude:113.3855 ,
+//   }
+//   this.mapView.animateTo({
+//     // tilt: 45,
+//     // rotation: 90,
+//     zoomLevel: 18,
+//     coordinate: data,
+//   })
+// }
 
 componentWillMount()
 {
@@ -497,7 +571,7 @@ _points = Array(1000).fill(0).map(() => ({
 }))
 
     render() {
-      const Pos ={
+      var Pos ={
         Mainpos:{
         latitude: this.state.latitude*1,
         longitude: this.state.longitude*1
@@ -517,21 +591,26 @@ _points = Array(1000).fill(0).map(() => ({
 
     }
 
-    
     if(this.DriversChange==true)
       this.RefreshDriverPosition()
-
-
-
     const { navigation } = this.props;
     const mode =navigation.getParam('Mode', null);
     const Searchlocation = navigation.getParam('Searchlocation',null)
+    let driverPos = Pos.DriverPos
       //！！！严重错误，不要在render里setstate,会导致无限重构
       return (
+
         <View style={styles.container}>
+           <TouchableOpacity style={{zIndex:2,position:'absolute',top:10,left:10}} activeOpacity={0.2} onPress={this._OpenDrawer}>
+             <Image style={{width:30,height:30}} source={require('../images/account_icon.png')}/>
+           </TouchableOpacity>
+	            <TouchableOpacity style={{zIndex:2,position:'absolute',top:50,left:50}} onPress={this._animatedToZGC}>
+	              <Text style={styles.text}>中关村</Text>
+	            </TouchableOpacity>
           <MapView
           coordinate={Pos.Mainpos}
           zoomLevel={this.state.zoom}
+          ref={ref => this.mapView = ref}
           locationEnabled
           locationInterval={10000}
           distanceFilter={10}
@@ -556,7 +635,7 @@ _points = Array(1000).fill(0).map(() => ({
                 <Text>我的位置</Text>
               </View>
             </MapView.Marker>
-            <MapView.Marker image="flag" coordinate={Pos.DriverPos}>
+            <MapView.Marker image="car" coordinate={driverPos}>
               <View style={styles.defaultbox}>
                 <Text>司机位置</Text>
               </View>
@@ -576,17 +655,17 @@ _points = Array(1000).fill(0).map(() => ({
 	        />
           </MapView>
         <View style={styles.middle}>
-        <Text style={styles.textInputStyle}>测试:{this.state.Togolatitude},{this.state.Togolongitude},{this.state.test3}</Text>
+        <Text style={styles.textInputStyle}>测试:{this.state.Togolatitude},{this.state.Togolongitude},{this.state.RouteGuide.length}</Text>
         {/* <Text style={styles.input}>测试:{this.state.test2},{this.state.test1}+{this.state.test3}</Text> */}
         <TouchableOpacity style={{flex:1 ,justifyContent:'center'}}>
                 <Text style={styles.textInputStyle} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
                 <Text style={styles.textInputStyle} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
-                <Button style={styles.login} onPress={() => this.Move()} title="Move"/>
+                <Button style={styles.login} onPress={() => this.PointAnimatedTo("driver",this.state.RouteGuide)} title="Move"/>
         </TouchableOpacity>
         </View>
         <View style={styles.bottom}>
          {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/> */}
-         <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between',color:'red' }} onPress={() => this.props.navigation.navigate('Login')} title="登陆测试"/>
+         {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between' }} onPress={() => this.props.navigation.openDrawer()} title="左侧抽屉"/> */}
          <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between',}} onPress={()=>this.Route()} title="路径测试"/>
         </View>
       </View>
@@ -667,6 +746,23 @@ const styles=StyleSheet.create(
           paddingRight: 15,
           paddingTop: 10,
           paddingBottom: 10,
+        },
+        buttons: {
+          width: Dimensions.get('window').width,
+          position: 'absolute',
+          flexDirection: 'row',
+          justifyContent: 'center',
+        },
+        button: {
+          padding: 10,
+          paddingLeft: 20,
+          paddingRight: 20,
+          margin: 10,
+          borderRadius: 50,
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+        },
+        text: {
+          fontSize: 16,
         },
     }
 );

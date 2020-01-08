@@ -10,9 +10,9 @@ export default class Mylist extends React.Component{
       }
   
       render() {
-        // if (!this.state.movies) {
-        //   return this.renderLoadingView()
-        // }
+        if (this.state.movies) {
+          return this.renderLoadingView()
+        } else 
       return (
           <View style={styles.container}>
             <View style={styles.course}>
