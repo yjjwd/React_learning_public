@@ -28,12 +28,19 @@ export default class HomeScreen extends React.Component {
       Togolatitude: '',
       Driverlatitude: '23.0526',
       Driverlongitude: '113.3955',
+      PreRoutePointLatitude:'',
+      PreRoutePointLongtitude:'',
+      NextRoutePointLatitude:'',
+      NextRoutePointLongtitude:'',
 
 
       test1: 'null', //调试用四个变量
       test2: 'null',
       test3: 'null',
+      test4:'min',
       testlog: [1, 2, 3, 4],
+      testinput1:'testinput1',
+      testinput2:'testinput2',
 
 
       NowLocation: '当前位置', //文本框中内容
@@ -55,17 +62,17 @@ export default class HomeScreen extends React.Component {
       temp: '',//万用
 
       RouteGuide: [],//导航用路径点 折线数组
+      RouteCount:0,
 
       UserPosition: '',//用户位置 海量点数组
       UsersChange: false, //是否有用户位置更新
       //司机位置 海量点数组
-      DriversPosition: [
-        //   {  
-        //   key:'王老7',
-        //   latitude: 23.0526 ,
-        //   longitude:113.3955 ,
-        // },
-      ],
+      DriversPosition:   [      
+        {  
+          latitude: 23.0526 ,
+          longitude:113.3955 ,
+        }],
+      DriversPosition2:[],
       DriversChange: false, //是否有司机位置更新
       box: 0
     }
@@ -91,7 +98,7 @@ export default class HomeScreen extends React.Component {
     var PtoP = this.EDistance(Point, Pedal, R)//计算考虑了地球的弧度问题
     var PtoStr = this.EDistance(Point, StrLonLat, R)
     var PtoEnd = this.EDistance(Point, EndLonLat, R)
-    var min = MIN(PtoP, PtoStr, PtoEnd)//要求的值
+    var min = this.MIN(PtoP, PtoStr, PtoEnd)//要求的值
     return min
   }
 
@@ -99,12 +106,12 @@ export default class HomeScreen extends React.Component {
   EDistance(LonLat1, LonLat2, R) {
     //将两点经纬度转换为三维直角坐标
     var DEF_PI = 3.14159265359
-    var x1 = Math.cos(this.getRad(LonLat1[0]))
-    var y1 = Math.sin(this.getRad(LonLat1[0]))
-    var z1 = Math.tan(this.getRad(LonLat1[1]))
-    var x2 = Math.cos(this.getRad(LonLat2[0]))
-    var y2 = Math.sin(this.getRad(LonLat2[0]))
-    var z2 = Math.tan(this.getRad(LonLat2[1]))
+    var x1 = Math.cos(this.getRad(LonLat1[0]*1))
+    var y1 = Math.sin(this.getRad(LonLat1[0]*1))
+    var z1 = Math.tan(this.getRad(LonLat1[1]*1))
+    var x2 = Math.cos(this.getRad(LonLat2[0]*1))
+    var y2 = Math.sin(this.getRad(LonLat2[0]*1))
+    var z2 = Math.tan(this.getRad(LonLat2[1]*1))
     //根据直角坐标求两点间的直线距离（即弦长）
     var L = Math.sqrt((x1 - x2) * (x1 - x2) + (y1 - y2) * (y1 - y2) + (z1 - z2) * (z1 - z2))
     //根据弦长求两点间的距离（即弧长）
@@ -116,7 +123,7 @@ export default class HomeScreen extends React.Component {
     var A = endlonlat[1] - strlonlat[1]
     var B = strlonlat[0] - endlonlat[0]
     var C = strlonlat[1] * endlonlat[0] - strlonlat[0] * endlonlat[1];
-    var Pedal = new double[2]
+    var Pedal = []
     Pedal[0] = (point[0] * B * B - point[1] * A * B - A * C) / (A * A + B * B)
     Pedal[1] = (point[1] * A * A - A * B * point[0] - B * C) / (A * A + B * B)
     // alert("垂足经度:"+Pedal[0]+"垂足纬度:"+Pedal[1]);
@@ -420,7 +427,8 @@ export default class HomeScreen extends React.Component {
             //   },
             // ]
           }
-          this.setState({ RouteGuide: this._routeline, test3: route_length })
+          this.setState({ RouteGuide: this._routeline,PreRoutePointLatitude:this._routeline[0].latitude,PreRoutePointLongtitude:this._routeline[0].longitude,
+            NextRoutePointLatitude:this._routeline[1].latitude,NextRoutePointLongtitude:this._routeline[1].longitude,RouteCount:0,test3: route_length })
         }
         ).catch((error) => {
           console.log('request failed', error)
@@ -452,7 +460,8 @@ export default class HomeScreen extends React.Component {
               this.setState({ test3: def.length })//用于确认temp确实读到值了
             }
           }
-          this.setState({ RouteGuide: this._routeline, test3: route_length })
+          this.setState({ RouteGuide: this._routeline,PreRoutePointLatitude:this._routeline[0].latitude,PreRoutePointLongtitude:this._routeline[0].longitude,
+            NextRoutePointLatitude:this._routeline[1].latitude,NextRoutePointLongtitude:this._routeline[1].longitude,RouteCount:0,test3: route_length })
         }
         ).catch((error) => {
           console.log('request failed', error)
@@ -512,10 +521,10 @@ export default class HomeScreen extends React.Component {
 
   _number = 1
 
-  PointAnimatedTo(Point, Route)  //点的移动函数
+  PointAnimatedTo(Point, Route)  //点的移动函数 一次到位演示版
   {
     var route = Route
-    var temp = { latitude: 0, longtitude: 0 }
+    var temp = { latitude: 0, longitude: 0 }
     var n = 0
     var dis = route[0]
     if (Point == "driver") {
@@ -527,12 +536,12 @@ export default class HomeScreen extends React.Component {
         {
           temp = dis
           temp.latitude = (dis.latitude + coord.latitude) / 2
-          temp.longtitude = (dis.latitude + coord.latitude) / 2
+          temp.longitude = (dis.latitude + coord.latitude) / 2
           distance = this.getGreatCircleDistance(coord.latitude, coord.longitude, temp.latitude, temp.longitude)
           while (distance > 30) 
           {
             temp.latitude = (temp.latitude + coord.latitude) / 2
-            coord.longtitude = (temp.latitude + coord.latitude) / 2
+            coord.longitude = (temp.latitude + coord.latitude) / 2
             distance = this.getGreatCircleDistance(coord.latitude, coord.longitude, temp.latitude, temp.longitude)
           }
           if (distance <= 30)
@@ -557,44 +566,58 @@ export default class HomeScreen extends React.Component {
     }
   }
 
-  DriverMove(DriverNowPos) 
-  {
-    var route = Route
-    var temp = { latitude: 0, longtitude: 0 }
-    var n = 0
-    var dis = route[0]
-    if (Point == "driver") {
-      var length = route.length
-        let coord = route[n++]
-        let distance = this.getGreatCircleDistance(dis.latitude, dis.longitude, coord.latitude, coord.longitude)
-        while (distance > 30) //处理直到两个点距离小于30m
-        {
-          temp = dis
-          temp.latitude = (dis.latitude + coord.latitude) / 2
-          temp.longtitude = (dis.latitude + coord.latitude) / 2
-          distance = this.getGreatCircleDistance(coord.latitude, coord.longitude, temp.latitude, temp.longitude)
-          while (distance > 30) 
-          {
-            temp.latitude = (temp.latitude + coord.latitude) / 2
-            coord.longtitude = (temp.latitude + coord.latitude) / 2
-            distance = this.getGreatCircleDistance(coord.latitude, coord.longitude, temp.latitude, temp.longitude)
-          }
-          if (distance <= 30)
-           {
-            this.RefreshDriverPosition(temp)
-            this.mapView.animateTo({
-              coordinate: temp,
-            })
-            coord = temp
-            distance = getGreatCircleDistance(coord.latitude, coord.longitude, dis.latitude, dis.longitude)
-          }
-        }
-        this.RefreshDriverPosition(coord)
-        this.mapView.animateTo({
-          coordinate: coord,
-        })
-        dis = route[n]
+  FlatPointToLine(startlat, startlng, endlat, endlng, poilat, poilng)
+  {     
+    var a,b,c;  
+    a=this.getGreatCircleDistance(startlat,startlng,endlat,endlng);//经纬坐标系中求两点的距离公式
+    b=this.getGreatCircleDistance(endlat,endlng,poilat,poilng);//经纬坐标系中求两点的距离公式
+    c=this.getGreatCircleDistance(startlat,startlng,poilat,poilng);//经纬坐标系中求两点的距离公式
+    if(b*b>=c*c+a*a)return c;   
+    if(c*c>=b*b+a*a)return b;  
+    var l=(a+b+c)/2;     //周长的一半   
+    var s=Math.sqrt(l*(l-a)*(l-b)*(l-c));  //海伦公式求面积 
+    return 2*s/a;   
   }
+
+  DriverMove(DriverNewPos)  //点的移动函数 正式版 参数为{longitude: ,latitude: }
+  {
+    var route = this.state.RouteGuide
+    var count = this.state.RouteCount
+    var PrePoint= {latitude:this.state.PreRoutePointLatitude,longitude:this.state.PreRoutePointLongtitude}
+    var NextPoint = {latitude:this.state.NextRoutePointLatitude,longitude:this.state.NextRoutePointLongtitude}
+    var DriverPos={latitude:this.state.Driverlatitude,longitude:this.state.Driverlongitude}
+    var temp = { latitude: 0, longitude: 0 }
+    this.setState({DriversPosition2:DriverNewPos,...this.state.DriversPosition2})
+    //先判断新位置是否脱离路线
+    var min= this.FlatPointToLine(PrePoint.latitude,PrePoint.longitude,NextPoint.latitude,NextPoint.longitude,DriverNewPos.latitude,DriverNewPos.longitude)
+    this.setState({test4:min})
+    if(min<50) //未脱离则单次移动动画，并计算新位置到两个点的距离，如果里离下一个点的距离小于离上一个点的距离
+    {
+       //如果单次移动距离大于三十米处理直到两个点距离小于30m，暂时取消
+      this.RefreshDriverPosition(DriverNewPos)
+      this.mapView.animateTo({coordinate:DriverNewPos})
+      this.setState({Driverlatitude:DriverNewPos.latitude,Driverlongitude:DriverNewPos.longitude})
+      let dis1=this.getGreatCircleDistance(PrePoint.latitude,PrePoint.longitude,DriverNewPos.latitude,DriverNewPos.longitude)
+      let dis2=this.getGreatCircleDistance(NextPoint.latitude,NextPoint.longitude,DriverNewPos.latitude,DriverNewPos.longitude)
+      if (dis2<dis1)
+      {
+        PrePoint = NextPoint
+        NextPoint = route[count++]
+        if(count==route.length)
+        {
+          alert('行程结束')
+        }
+        this.setState({RouteCount:count,PreRoutePointLatitude:PrePoint.latitude,PreRoutePointLongtitude:PrePoint.longitude,
+        NextRoutePointLatitude:NextPoint.latitude,NextRoutePointLongtitude:NextPoint.longitude})
+      }
+    } else //脱离则重新计算路线
+    {
+      this.Route()
+      return 0
+    }
+
+
+   
 }
 
   Move()//司机位置更新调试用
@@ -629,6 +652,10 @@ export default class HomeScreen extends React.Component {
 
   _OpenDrawer = () => this.props.navigation.openDrawer()
 
+  _DriverMove=()=>{
+    var data={latitude:this.state.testinput1*1,longitude:this.state.testinput2*1}
+    this.DriverMove(data)
+  }
   // _animatedToZGC = () => {
   //   var data={
   //     latitude: this.state.Driverlatitude*1+0.001 ,
@@ -717,7 +744,7 @@ export default class HomeScreen extends React.Component {
               <Text>我的位置</Text>
             </View>
           </MapView.Marker>
-          <MapView.Marker image="car" coordinate={driverPos}>
+          <MapView.Marker image="default" coordinate={driverPos}>
             <View style={styles.defaultbox}>
               <Text>司机位置</Text>
             </View>
@@ -737,12 +764,17 @@ export default class HomeScreen extends React.Component {
           />
         </MapView>
         <View style={styles.middle}>
-          <Text style={styles.textInputStyle}>测试:{this.state.Togolatitude},{this.state.Togolongitude},{this.state.RouteGuide.length}</Text>
+          <Text style={styles.textInputStyle}>{this.state.Togolatitude},{this.state.Togolongitude},{this.state.RouteGuide.length},{this.state.test4},{this.state.test2}</Text>
           {/* <Text style={styles.input}>测试:{this.state.test2},{this.state.test1}+{this.state.test3}</Text> */}
           <TouchableOpacity style={{ flex: 1, justifyContent: 'center' }}>
+          <View style={{flex:1,alignContent:'center',flexDirection: 'row',}}>
+            <TextInput style={styles.textInputStyle2} onChangeText={(input) => {this.setState({testinput1:input}) }} value={this.state.testinput1} placeholder={'latitude'}></TextInput>
+            <TextInput style={styles.textInputStyle2} onChangeText={(input) => {this.setState({testinput2:input}) }} value={this.state.testinput2} placeholder={'longitude'}></TextInput>
+          </View>
             <Text style={styles.textInputStyle} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
             <Text style={styles.textInputStyle} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
-            <Button style={styles.login} onPress={() => this.PointAnimatedTo("driver", this.state.RouteGuide)} title="Move" />
+            <Button style={styles.login} onPress={this._DriverMove} title="DriverMove" />
+            {/* <Button style={styles.login} onPress={() => this.PointAnimatedTo("driver", this.state.RouteGuide)} title="Move" /> */}
           </TouchableOpacity>
         </View>
         <View style={styles.bottom}>
@@ -800,12 +832,19 @@ const styles = StyleSheet.create(
       backgroundColor: 'orange',
       width: 150,
       height: 50,
-      lineHeight: 50,
+      lineHeight: 50,   
       textAlign: 'center',
     },
     textInputStyle: {
       height: 38,
-      width: screenWidth,
+      width: screenWidth-40,
+      backgroundColor: 'white',
+      marginBottom: 1,
+      textAlign: 'center'
+    },
+    textInputStyle2: {
+      height: 38,
+      width: 200,
       backgroundColor: 'white',
       marginBottom: 1,
       textAlign: 'center'
