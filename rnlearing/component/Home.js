@@ -386,13 +386,14 @@ export default class HomeScreen extends React.Component {
   //     }
   // }
 
-  Route()//得到导航路径点
+  Route(Fromlatitude,Fromlongitide,Tolatitude,Tolongitude)//得到导航路径点
   {
-    if (this.state.Nowlatitude && this.state.Togolatitude) {
+    if (this.state.Nowlatitude && this.state.Togolatitude) 
+    {
       this._routeline = []
       var route_length = 0
       //此处使用驾车导航api，还有步行公交骑行等
-      fetch("https://restapi.amap.com/v3/direction/driving?key=4df0ef52b83b532834ffa118afa77de5&origin=" + this.state.Nowlongitude + "," + this.state.Nowlatitude + "&destination=" + this.state.Togolongitude + "," + this.state.Togolatitude + "&originid=&destinationid=&extensions=base&strategy=0&waypoints=&avoidpolygons=&avoidroad=")
+      fetch("https://restapi.amap.com/v3/direction/driving?key=4df0ef52b83b532834ffa118afa77de5&origin=" + Fromlongitide + "," + Fromlatitude + "&destination=" + Tolongitude + "," + Tolatitude + "&originid=&destinationid=&extensions=base&strategy=0&waypoints=&avoidpolygons=&avoidroad=")
         .then(response => response.json())
         .then(json => {
           for (var a = 0; a < json.route.paths[0].steps.length; a++) {
@@ -477,7 +478,7 @@ export default class HomeScreen extends React.Component {
 
   _DriverPoint = []
 
-  RefreshDriverPosition = (data) =>     //更新司机位置的函数 data 为 object 包涵 key latitude longititude 三个（单个司机版本）
+  RefreshDriverPosition = (data) =>     //更新司机位置的函数 data 为 object 包涵 latitude longititude 两个（单个司机版本）
   {
     const longitude = data.longitude;
     const latitude = data.latitude;
@@ -579,8 +580,15 @@ export default class HomeScreen extends React.Component {
     return 2*s/a;   
   }
 
+  _MoveFlag=false
   DriverMove(DriverNewPos)  //点的移动函数 正式版 参数为{longitude: ,latitude: }
   {
+    if(this._MoveFlag)
+     {
+       alert("等待")
+       return 0
+      }
+    this._MoveFlag=true
     var route = this.state.RouteGuide
     var count = this.state.RouteCount
     var PrePoint= {latitude:this.state.PreRoutePointLatitude,longitude:this.state.PreRoutePointLongtitude}
@@ -594,6 +602,7 @@ export default class HomeScreen extends React.Component {
     if(min<50) //未脱离则单次移动动画，并计算新位置到两个点的距离，如果里离下一个点的距离小于离上一个点的距离
     {
        //如果单次移动距离大于三十米处理直到两个点距离小于30m，暂时取消
+       alert("loop1")
       this.RefreshDriverPosition(DriverNewPos)
       this.mapView.animateTo({coordinate:DriverNewPos})
       this.setState({Driverlatitude:DriverNewPos.latitude,Driverlongitude:DriverNewPos.longitude})
@@ -609,10 +618,18 @@ export default class HomeScreen extends React.Component {
         }
         this.setState({RouteCount:count,PreRoutePointLatitude:PrePoint.latitude,PreRoutePointLongtitude:PrePoint.longitude,
         NextRoutePointLatitude:NextPoint.latitude,NextRoutePointLongtitude:NextPoint.longitude})
+        this._MoveFlag=false
+        return 1
       }
     } else //脱离则重新计算路线
     {
-      this.Route()
+      alert("loop2")
+      this.Route(this.state.Driverlatitude,this.state.Driverlongitude,this.state.Togolatitude,this.state.Togolongitude)
+      //需要加一个锁，使得路径更新完成时才能输入新的坐标
+      this.RefreshDriverPosition(DriverNewPos)
+      this.mapView.animateTo({coordinate:DriverNewPos})
+      this.setState({Driverlatitude:DriverNewPos.latitude,Driverlongitude:DriverNewPos.longitude})
+      this._MoveFlag=false
       return 0
     }
 
@@ -668,7 +685,10 @@ export default class HomeScreen extends React.Component {
   //     coordinate: data,
   //   })
   // }
-
+_Routetest=()=>{
+  this.Route(this.state.Nowlatitude,this.state.Nowlongitude,this.state.Togolatitude,this.state.Togolongitude)
+  // this.setState({min:this.state.Nowlatitude,test4:this.state.Nowlongitude})
+}
   componentWillMount() {
 
   }
@@ -713,9 +733,9 @@ export default class HomeScreen extends React.Component {
         <TouchableOpacity style={{ zIndex: 2, position: 'absolute', top: 10, left: 10 }} activeOpacity={0.2} onPress={this._OpenDrawer}>
           <Image style={{ width: 30, height: 30 }} source={require('../images/account_icon.png')} />
         </TouchableOpacity>
-        <TouchableOpacity style={{ zIndex: 2, position: 'absolute', top: 50, left: 50 }} onPress={this._animatedToZGC}>
-          <Text style={styles.text}>中关村</Text>
-        </TouchableOpacity>
+        {/* <TouchableOpacity style={{ zIndex: 2, position: 'absolute', top: 50, left: 50 }} onPress={this._animatedToZGC}>
+          <Text style={styles.text}>跳转测试</Text>
+        </TouchableOpacity> */}
         <MapView
           coordinate={Pos.Mainpos}
           zoomLevel={this.state.zoom}
@@ -764,7 +784,7 @@ export default class HomeScreen extends React.Component {
           />
         </MapView>
         <View style={styles.middle}>
-          <Text style={styles.textInputStyle}>{this.state.Togolatitude},{this.state.Togolongitude},{this.state.RouteGuide.length},{this.state.test4},{this.state.test2}</Text>
+          <Text style={styles.textInputStyle}>{this.state.Togolatitude},{this.state.Togolongitude},{this.state.RouteGuide.length},{this.state.Driverlatitude},{this.state.Driverlongitude}</Text>
           {/* <Text style={styles.input}>测试:{this.state.test2},{this.state.test1}+{this.state.test3}</Text> */}
           <TouchableOpacity style={{ flex: 1, justifyContent: 'center' }}>
           <View style={{flex:1,alignContent:'center',flexDirection: 'row',}}>
@@ -780,7 +800,7 @@ export default class HomeScreen extends React.Component {
         <View style={styles.bottom}>
           {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/> */}
           {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between' }} onPress={() => this.props.navigation.openDrawer()} title="左侧抽屉"/> */}
-          <Button style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'space-between', }} onPress={() => this.Route()} title="路径测试" />
+          <Button style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'space-between', }} onPress={this._Routetest} title="路径测试" />
         </View>
       </View>
     )
