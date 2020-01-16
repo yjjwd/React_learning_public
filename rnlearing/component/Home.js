@@ -625,7 +625,7 @@ export default class HomeScreen extends React.Component {
     {
       alert("loop2")
       this.Route(this.state.Driverlatitude,this.state.Driverlongitude,this.state.Togolatitude,this.state.Togolongitude)
-      //需要加一个锁，使得路径更新完成时才能输入新的坐标
+      //需要加一个锁，使得路径更新完成时才能输入新的坐标 完成
       this.RefreshDriverPosition(DriverNewPos)
       this.mapView.animateTo({coordinate:DriverNewPos})
       this.setState({Driverlatitude:DriverNewPos.latitude,Driverlongitude:DriverNewPos.longitude})
@@ -783,35 +783,114 @@ _Routetest=()=>{
             onItemPress={this._DriversonItemPress}
           />
         </MapView>
-        <View style={styles.middle}>
-          <Text style={styles.textInputStyle}>{this.state.Togolatitude},{this.state.Togolongitude},{this.state.RouteGuide.length},{this.state.Driverlatitude},{this.state.Driverlongitude}</Text>
-          {/* <Text style={styles.input}>测试:{this.state.test2},{this.state.test1}+{this.state.test3}</Text> */}
-          <TouchableOpacity style={{ flex: 1, justifyContent: 'center' }}>
-          <View style={{flex:1,alignContent:'center',flexDirection: 'row',}}>
-            <TextInput style={styles.textInputStyle2} onChangeText={(input) => {this.setState({testinput1:input}) }} value={this.state.testinput1} placeholder={'latitude'}></TextInput>
-            <TextInput style={styles.textInputStyle2} onChangeText={(input) => {this.setState({testinput2:input}) }} value={this.state.testinput2} placeholder={'longitude'}></TextInput>
+        <View style={sty.bottom}>
+          <View style={sty.BotTop}>
+              <View style={sty.Bottom1}><Text style={sty.fontSize}>现在</Text></View>
+              <View style={sty.Bottom1}><Text style={sty.fontSize}>预约</Text></View>
+              <View style={sty.Bottom1}><Text style={sty.fontSize}>接送机</Text></View>
           </View>
-            <Text style={styles.textInputStyle} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
-            <Text style={styles.textInputStyle} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
-            <Button style={styles.login} onPress={this._DriverMove} title="DriverMove" />
-            {/* <Button style={styles.login} onPress={() => this.PointAnimatedTo("driver", this.state.RouteGuide)} title="Move" /> */}
-          </TouchableOpacity>
-        </View>
-        <View style={styles.bottom}>
-          {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between'}} onPress={() => this.props.navigation.navigate('Mine')} title="我的课程"/> */}
-          {/* <Button style={{flex: 1, alignItems: 'flex-end', justifyContent: 'space-between' }} onPress={() => this.props.navigation.openDrawer()} title="左侧抽屉"/> */}
-          <Button style={{ flex: 1, alignItems: 'flex-end', justifyContent: 'space-between', }} onPress={this._Routetest} title="路径测试" />
+           <View style={sty.NowAndToGo}>
+           <TouchableOpacity  style={sty.Now}>
+             <View style={{flex:1}}><Image style={{ width: 30, height: 30 }} source={require('../images/greenpoint.png')} /></View>
+             <View style={{flex:15,backgroundColor:'white'}}> 
+              <Text style={sty.textInputStyle} onPress={(event) => this.Postdata('Now')} key='Now'>{this.state.NowLocation}</Text>
+             </View>    
+           </TouchableOpacity>
+           <TouchableOpacity  style={sty.Togo}>
+           <View style={{flex:1}}><Image style={{ width: 30, height: 30 }} source={require('../images/orangepoint.png')} /></View>
+             <View style={{flex:15,backgroundColor:'white'}}> 
+             <Text style={sty.textInputStyle} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
+             </View>    
+           </TouchableOpacity>
+          </View>
         </View>
       </View>
     )
   }
 }
 
+const sty = StyleSheet.create(
+  {
+    bottom:{
+      position: 'absolute',
+      paddingHorizontal:40,
+      zIndex:2,
+      bottom:20,
+      left:10,
+      right:10,
+      width:screenWidth-20,
+      height:160,
+      backgroundColor:'white',
+      opacity:0.9,
+      flex:1,
+      justifyContent:'center',
+      alignContent:'center',
+    },
+    BotTop:{
+      flex:1,
+      padding:10,
+      backgroundColor:'white',
+      height:20,
+      margin:8,
+      flexDirection:'row',
+      alignItems:'center',
+      alignContent:'center',
+      justifyContent:'center',
+    },
+    Bottom1:{
+      flex:1,
+      padding:2,
+      marginHorizontal:25,
+      marginVertical:10,
+      borderWidth:1,
+      borderRadius:10,
+      borderColor:'rgb(239,239,220)',
+    },
+    NowAndToGo:{
+      flex:6,
+      marginVertical:5,
+      backgroundColor:'white',
+    },
+    fontSize:{
+      textAlign:'center',
+      fontWeight:'bold',
+      color:'black'
+    },
+    Now:{
+      flex:1,
+      flexDirection:'row',
+      backgroundColor:'white',
+      alignContent:'flex-start',
+      alignItems:'center',
+      justifyContent:'flex-start',
+      borderBottomWidth:1,
+      borderBottomColor:'rgb(239,239,220)', 
+    },
+    Togo:{
+      flex:1,
+      flexDirection:'row',
+      backgroundColor:'white',
+      alignContent:'center',
+      alignItems:'center',
+      justifyContent:'center',
+    },
+    textInputStyle: {
+      // height: 38,
+      // width: screenWidth-40,
+      backgroundColor: 'white',
+      marginBottom: 1,
+      textAlign: 'center'
+    },
+  }
+)
+
+
 const styles = StyleSheet.create(
   {
     container: {
       flex: 1,
     },
+    
     title: {
       fontSize: 40,
       fontWeight: 'bold',
