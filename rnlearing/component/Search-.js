@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { Text, ScrollView, View, Image, TextInput, StyleSheet, Button, FlatList, TouchableOpacity, Platform, Header } from 'react-native';
+import { Text, ScrollView, View, Image, TextInput, StyleSheet, Button, FlatList, TouchableOpacity, Platform } from 'react-native';
 import { NavigationEvents, Header } from 'react-navigation'
 import Mylist from './module/Mylist'
 
@@ -35,30 +35,30 @@ export default class Search extends React.Component {
   }
   //获取搜索列表数据
   _getHotWords() {
-    // ModalIndicator.show('请求中...')
+    ModalIndicator.show('请求中...')
     let params = '{"data":{}}'
-    // this._post('common/v2/campus/getHotWords', {},
-    //   params, true, data => {
-    //     // ModalIndicator.hide()
-    //     if (data.code == 0) {
-    //       console.log('hotTagsArr: ' + data.data)
-    //       console.log('hotTagsArr: ' + data.data.hot_words)
-    //       if (!_.isEmpty(data.data.hot_words)) {
-    //         this.setState({
-    //           hotTagsArr: data.data.hot_words,
-    //         })
-    //       } else {
-    //         this.setState({
-    //           hotTagsArr: [],
-    //         })
-    //       }
-    //     } else {
-    //       _showModalMessage(this.props.navigation, data.msg);
-    //     }
-    //   }, err => {
-    //     // ModalIndicator.hide()
-    //     console.log('err: ', err)
-    //   })
+    this._post('common/v2/campus/getHotWords', {},
+      params, true, data => {
+        // ModalIndicator.hide()
+        if (data.code == 0) {
+          console.log('hotTagsArr: ' + data.data)
+          console.log('hotTagsArr: ' + data.data.hot_words)
+          if (!_.isEmpty(data.data.hot_words)) {
+            this.setState({
+              hotTagsArr: data.data.hot_words,
+            })
+          } else {
+            this.setState({
+              hotTagsArr: [],
+            })
+          }
+        } else {
+          _showModalMessage(this.props.navigation, data.msg);
+        }
+      }, err => {
+        // ModalIndicator.hide()
+        console.log('err: ', err)
+      })
   }
 
   //关键字改变
@@ -158,10 +158,10 @@ export default class Search extends React.Component {
         {/*监听页面，刷新搜索本地历史历史*/}
         <NavigationEvents onWillFocus={() => {
           //查询本地搜索历史
-          this._getHistory();
+          // this._getHistory();
         }} />
         <Header title='搜索'
-          navigation={this.props.navigation}
+          // navigation={this.props.navigation}
           show_close_img={true}
         />
         <View style={styles.inputBox}>
@@ -174,15 +174,15 @@ export default class Search extends React.Component {
             onChangeText={(text) => this.setState({ value: text })}
             onSubmitEditing={() => {
               //开始搜索
-              this.onChanegeTextKeyword(this.state.value);
-              // 保存搜索内容
-              this._insertSearch(this.state.value);
+              // this.onChanegeTextKeyword(this.state.value);
+              // // 保存搜索内容
+              // this._insertSearch(this.state.value);
             }}
             returnKeyType="search"
             underlineColorAndroid="transparent"
             placeholder={this.state.placeholder}
             placeholderTextColor={'#BFBFBF'}
-            onFocus={this._onFous.bind(this)}
+            // onFocus={this._onFous.bind(this)}
             autoFocus={true}
             defaultValue={this.state.value}
             keyboardType="default" />

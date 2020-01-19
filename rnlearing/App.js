@@ -14,7 +14,8 @@ import {createStackNavigator, createAppContainer,DrawerNavigator,createDrawerNav
 import HomeScreen from './component/Home'
 import LoginScreen from './component/Login'
 import LoginView from './component/NewLogin'
-import Search from './component/Search'
+import Search from './component/Search copy'
+import Search2 from './component/Search-'
 import MessageScreen from './component/Message'
 import OrderFormScreen from './component/OrderForm'
 
@@ -44,6 +45,9 @@ const AppNavigator = createDrawerNavigator({
   },
   Message: {
     screen:MessageScreen,
+  },
+  Test:{
+    screen:Search,
   }
   // Search:{
   //   screen:Search
