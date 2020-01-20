@@ -42,9 +42,14 @@ export default class HomeScreen extends React.Component {
       test2: 'null',
       test3: 'null',
       test4: 'min',
+      dis1:'',
+      dis2:'',
+      loop:' ',
       testlog: [1, 2, 3, 4],
       testinput1: 'testinput1',
       testinput2: 'testinput2',
+      bottommode:0,
+      poslock:false,
 
 
       NowLocation: '当前位置', //文本框中内容
@@ -264,6 +269,7 @@ export default class HomeScreen extends React.Component {
   }
 
   NowLocationChange = ({ nativeEvent }) => {
+    if(this.state.poslock) return 0
     const longitude = nativeEvent.longitude;
     const latitude = nativeEvent.latitude;
     if (this.state.searched == true) this.setState({ test: false }) //暂时弃用搜索标记
@@ -588,10 +594,10 @@ export default class HomeScreen extends React.Component {
   _MoveFlag = false
   DriverMove(DriverNewPos)  //点的移动函数 正式版 参数为{longitude: ,latitude: }
   {
-    if (this._MoveFlag) {
-      alert("等待")
-      return 0
-    }
+    // if (this._MoveFlag==true) {
+    //   this.setState({loop:'wait'})
+    //   return 0
+    // }
     this._MoveFlag = true
     var route = this.state.RouteGuide
     var count = this.state.RouteCount
@@ -599,23 +605,30 @@ export default class HomeScreen extends React.Component {
     var NextPoint = { latitude: this.state.NextRoutePointLatitude, longitude: this.state.NextRoutePointLongtitude }
     var DriverPos = { latitude: this.state.Driverlatitude, longitude: this.state.Driverlongitude }
     var temp = { latitude: 0, longitude: 0 }
-    this.setState({ DriversPosition2: DriverNewPos, ...this.state.DriversPosition2 })
+    this.setState({ DriversPosition2: DriverNewPos, ...this.state.DriversPosition2,poslock:true})
     //先判断新位置是否脱离路线
     var min = this.FlatPointToLine(PrePoint.latitude, PrePoint.longitude, NextPoint.latitude, NextPoint.longitude, DriverNewPos.latitude, DriverNewPos.longitude)
     this.setState({ test4: min })
-    if (min < 50) //未脱离则单次移动动画，并计算新位置到两个点的距离，如果里离下一个点的距离小于离上一个点的距离
+    if (min < 500) //未脱离则单次移动动画，并计算新位置到两个点的距离，如果里离下一个点的距离小于离上一个点的距离
     {
       //如果单次移动距离大于三十米处理直到两个点距离小于30m，暂时取消
-      alert("loop1")
+      this.setState({loop:'loop1'})
       this.RefreshDriverPosition(DriverNewPos)
       this.mapView.animateTo({ coordinate: DriverNewPos })
       this.setState({ Driverlatitude: DriverNewPos.latitude, Driverlongitude: DriverNewPos.longitude })
       let dis1 = this.getGreatCircleDistance(PrePoint.latitude, PrePoint.longitude, DriverNewPos.latitude, DriverNewPos.longitude)
       let dis2 = this.getGreatCircleDistance(NextPoint.latitude, NextPoint.longitude, DriverNewPos.latitude, DriverNewPos.longitude)
+      this.setState({dis1:dis1,dis2:dis2})
       if (dis2 < dis1) {
         PrePoint = NextPoint
         NextPoint = route[count++]
-        if (count == route.length) {
+        while((PrePoint.longitude==NextPoint.longitude)&&(PrePoint.latitude==NextPoint.latitude))
+        {
+          alert('test')
+          PrePoint = NextPoint
+          NextPoint = route[count++]
+        }
+        if (this.getGreatCircleDistance(this.state.Driverlatitude,this.state.Driverlongitude,this.state.Togolatitude,this.state.Togolongitude) < 500) {
           alert('行程结束')
         }
         this.setState({
@@ -627,7 +640,7 @@ export default class HomeScreen extends React.Component {
       }
     } else //脱离则重新计算路线
     {
-      alert("loop2")
+      this.setState({loop:'loop2'})
       this.Route(this.state.Driverlatitude, this.state.Driverlongitude, this.state.Togolatitude, this.state.Togolongitude)
       //需要加一个锁，使得路径更新完成时才能输入新的坐标 完成
       this.RefreshDriverPosition(DriverNewPos)
@@ -671,10 +684,56 @@ export default class HomeScreen extends React.Component {
   // }, 1000);
   //   }
 
+ changeTwoDecimal(x)
+{
+   var f_x = parseFloat(x);
+   if (isNaN(f_x))
+   {
+      alert('function:changeTwoDecimal->parameter error');
+      return false;
+   }
+   f_x = Math.round(f_x *10000)/10000;
+
+   return f_x;
+}
+
   _OpenDrawer = () => this.props.navigation.openDrawer()
 
-  _DriverMove = () => {
-    var data = { latitude: this.state.testinput1 * 1, longitude: this.state.testinput2 * 1 }
+  DriverMoveTest(){
+    var data = { latitude: this.state.testinput1*1, longitude: this.state.testinput2*1}
+    this.DriverMove(data)
+  }
+
+  _DriverUp = () => {
+    var data = { latitude: this.state.Driverlatitude * 1+0.0001, longitude: this.state.Driverlongitude * 1 }
+    this.DriverMove(data)
+  }
+  _DriverDown = () => {
+    var data = { latitude: this.state.Driverlatitude * 1-0.0001, longitude: this.state.Driverlongitude * 1 }
+    this.DriverMove(data)
+  }
+  _DriverLeft = () => {
+    var data = { latitude: this.state.Driverlatitude * 1, longitude: this.state.Driverlongitude * 1-0.0001 }
+    this.DriverMove(data)
+  }
+  _DriverRight = () => {
+    var data = { latitude: this.state.Driverlatitude * 1, longitude: this.state.Driverlongitude * 1+0.0001 }
+    this.DriverMove(data)
+  }
+  _DriverUp2 = () => {
+    var data = { latitude: this.state.Driverlatitude * 1+0.001, longitude: this.state.Driverlongitude * 1 }
+    this.DriverMove(data)
+  }
+  _DriverDown2 = () => {
+    var data = { latitude: this.state.Driverlatitude * 1-0.001, longitude: this.state.Driverlongitude * 1 }
+    this.DriverMove(data)
+  }
+  _DriverLeft2 = () => {
+    var data = { latitude: this.state.Driverlatitude * 1, longitude: this.state.Driverlongitude * 1-0.001 }
+    this.DriverMove(data)
+  }
+  _DriverRight2 = () => {
+    var data = { latitude: this.state.Driverlatitude * 1, longitude: this.state.Driverlongitude * 1+0.001 }
     this.DriverMove(data)
   }
   // _animatedToZGC = () => {
@@ -689,6 +748,7 @@ export default class HomeScreen extends React.Component {
   //     coordinate: data,
   //   })
   // }
+
   _Routetest = () => {
     this.Route(this.state.Nowlatitude, this.state.Nowlongitude, this.state.Togolatitude, this.state.Togolongitude)
     // this.setState({min:this.state.Nowlatitude,test4:this.state.Nowlongitude})
@@ -730,6 +790,14 @@ export default class HomeScreen extends React.Component {
       DriverPos: {
         latitude: this.state.Driverlatitude * 1,
         longitude: this.state.Driverlongitude * 1
+      },
+      PrePoint:{
+        latitude:this.state.PreRoutePointLatitude*1,
+        longitude:this.state.PreRoutePointLongtitude*1,
+      },
+      NextPoint:{
+        latitude:this.state.NextRoutePointLatitude*1,
+        longitude:this.state.NextRoutePointLongtitude*1,
       }
 
     }
@@ -781,9 +849,19 @@ export default class HomeScreen extends React.Component {
               <Text>我的位置</Text>
             </View>
           </MapView.Marker>
-          <MapView.Marker image="default" coordinate={driverPos}>
+          <MapView.Marker image="car" coordinate={driverPos}>
             <View style={styles.defaultbox}>
               <Text>司机位置</Text>
+            </View>
+          </MapView.Marker>
+          <MapView.Marker color='green' coordinate={Pos.PrePoint}>
+            <View style={styles.defaultbox}>
+              <Text>Pre</Text>
+            </View>
+          </MapView.Marker>
+          <MapView.Marker color='red' coordinate={Pos.NextPoint}>
+            <View style={styles.defaultbox}>
+              <Text>Next</Text>
             </View>
           </MapView.Marker>
           <MapView.Polyline
@@ -794,20 +872,21 @@ export default class HomeScreen extends React.Component {
           {/* {this.state.DriversPosition.map((item)=>{
             return <DriversPos coords={item}/>
           })} */}
-          <MapView.MultiPoint
+          {/* <MapView.MultiPoint
             image="point"
             points={this.state.DriversPosition}
             onItemPress={this._DriversonItemPress}
-          />
+          /> */}
         </MapView>
         {/* 底部菜单 */}
         <View style={sty.bottom}>
           <View style={sty.BotTop}>
-            <View style={sty.Bottom1}><Text style={sty.fontSize}>现在</Text></View>
+            <TouchableOpacity style={sty.Bottom1} onPress={()=>{this.setState({bottommode:0})}}><Text style={sty.fontSize}>现在</Text></TouchableOpacity>
             <View style={sty.Bottom1}><Text style={sty.fontSize}>预约</Text></View>
-            <View style={sty.Bottom1}><Text style={sty.fontSize}>接送机</Text></View>
+            <TouchableOpacity style={sty.Bottom1}  onPress={()=>{this.setState({bottommode:1})}}><Text style={sty.fontSize}>调试</Text></TouchableOpacity>
           </View>
-          <View style={sty.NowAndToGo}>
+          {this.state.bottommode==0?
+            <View style={sty.NowAndToGo}>
             <TouchableOpacity style={sty.Now}>
               <View style={{ flex: 1 }}><Image style={{ width: 30, height: 30 }} source={require('../images/greenpoint.png')} /></View>
               <View style={{ flex: 15, backgroundColor: 'white' }}>
@@ -820,7 +899,38 @@ export default class HomeScreen extends React.Component {
                 <Text style={sty.textInputStyle} onPress={(event) => this.Postdata('To')} key='To'>{this.state.Togo}</Text>
               </View>
             </TouchableOpacity>
+          </View>:
+          <View style={{flex:6,width:screenWidth - 80}}>
+            <View style={sty.debug}>
+              <Text>目标位置:{this.changeTwoDecimal(this.state.Togolatitude*1)},{this.changeTwoDecimal(this.state.Togolongitude*1)},{this.changeTwoDecimal(this.state.RouteGuide.length*1)}</Text>
+              {/* <Text>司机位置:{this.changeTwoDecimal(this.state.Driverlatitude*1)},{this.changeTwoDecimal(this.state.Driverlongitude*1)},{this.state.loop},{this.state.test4}</Text> */}
+              <Text>Pre:{this.changeTwoDecimal(this.state.PreRoutePointLatitude*1)},{this.changeTwoDecimal(this.state.PreRoutePointLongtitude*1)}</Text>
+              <Text>Next:{this.changeTwoDecimal(this.state.NextRoutePointLatitude*1)},{this.changeTwoDecimal(this.state.NextRoutePointLongtitude*1)} | {this.state.dis1},{this.state.dis2}</Text>
+
+            </View>
+            <View style={{alignContent:'center',flexDirection: 'row',margin:10,justifyContent:'center',alignItems:"center"}}>
+              <TextInput style={sty.textInputStyle2} onChangeText={(input) => {this.setState({testinput1:input}) }} value={this.state.testinput1} placeholder={'latitude'}></TextInput>
+              <TextInput style={sty.textInputStyle2} onChangeText={(input) => {this.setState({testinput2:input}) }} value={this.state.testinput2} placeholder={'longitude'}></TextInput>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',height:20,width:40,borderRightWidth:1}} onPress={()=>{
+                let a=this.changeTwoDecimal(this.state.Driverlatitude)
+                let b =this.changeTwoDecimal(this.state.Driverlongitude)
+              this.setState({testinput1:a.toString(),testinput2:b.toString()})}}>
+              <Text>更新</Text></TouchableOpacity>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',height:20,width:40}} onPress={()=>{this.DriverMoveTest()}}><Text>提交</Text></TouchableOpacity>
+            </View>
+            <View style={{alignContent:'center',flexDirection: 'row',height:15}}>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',width:100,heigth:15,borderRightWidth:1}} onPress={this._Routetest}><Text>路径测试</Text></TouchableOpacity>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',width:20,heigth:15,borderRightWidth:1}} onPress={this._DriverUp}><Text>上</Text></TouchableOpacity>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',width:20,heigth:15,borderRightWidth:1}} onPress={this._DriverDown}><Text>下</Text></TouchableOpacity>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',width:20,heigth:15,borderRightWidth:1}} onPress={this._DriverLeft}><Text>左</Text></TouchableOpacity>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',width:20,heigth:15,borderRightWidth:1}} onPress={this._DriverRight}><Text>右</Text></TouchableOpacity>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',width:30,heigth:15,borderRightWidth:1}} onPress={this._DriverUp2}><Text>上2</Text></TouchableOpacity>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',width:30,heigth:15,borderRightWidth:1}} onPress={this._DriverDown2}><Text>下2</Text></TouchableOpacity>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',width:30,heigth:15,borderRightWidth:1}} onPress={this._DriverLeft2}><Text>左2</Text></TouchableOpacity>
+              <TouchableOpacity style={{alignItems:'center',backgroundColor:'lightblue',width:30,heigth:15,borderRightWidth:1}} onPress={this._DriverRigh2}><Text>右2</Text></TouchableOpacity>
+            </View>
           </View>
+          }
         </View>
         {/* 顶部菜单 */}
 
@@ -876,6 +986,16 @@ export default class HomeScreen extends React.Component {
 
 const sty = StyleSheet.create(
   {
+    textInputStyle2:{
+        backgroundColor: 'white',
+        textAlign: 'center',
+    },
+    debug:{
+      justifyContent:'center',
+      alignItems:'center',
+      marginBottom:5,
+      flex:1
+    },
     funcbar:{
       position:'absolute',
       zIndex:2,
@@ -1054,8 +1174,7 @@ const styles = StyleSheet.create(
       textAlign: 'center'
     },
     textInputStyle2: {
-      height: 38,
-      width: 200,
+      height: 30,
       backgroundColor: 'white',
       marginBottom: 1,
       textAlign: 'center'

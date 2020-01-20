@@ -102,7 +102,7 @@ export default class Search extends React.Component {
             value={this.state.searchtext}
             onChangeText={(searchtext) => this.setState({ searchtext: searchtext })}
             onSubmitEditing={() => {
-              this.GetData()
+              this.GetData(this.state.searchtext)
             }}
             returnKeyType="search"
             underlineColorAndroid="transparent"
@@ -241,7 +241,6 @@ const styles = StyleSheet.create({
     flex: 1,
     width: screenWidth,
     height: 80,
-    backgroundColor: 'red',
   },
   item: {
     height: 80
